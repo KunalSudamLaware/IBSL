@@ -1,0 +1,205 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id                      String                   @id @default(cuid())
+  name                    String
+  email                   String                   @unique
+  phone                   String?
+  passwordHash            String
+  role                    Role                     @default(CUSTOMER)
+  createdAt               DateTime                 @default(now())
+  emailVerified           Boolean                  @default(false)
+  mobileVerified          Boolean                  @default(false)
+  emailVerificationTokens EmailVerificationToken[]
+  mobileVerificationOtps  MobileVerificationOtp[]
+  orders                  Order[]
+  passwordResetTokens     PasswordResetToken[]
+
+  @@index([email])
+  @@map("users")
+}
+
+model EmailVerificationToken {
+  id        String   @id @default(cuid())
+  userId    String
+  tokenHash String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([tokenHash])
+  @@map("email_verification_tokens")
+}
+
+model MobileVerificationOtp {
+  id        String   @id @default(cuid())
+  userId    String
+  otpHash   String
+  expiresAt DateTime
+  attempts  Int      @default(0)
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("mobile_verification_otps")
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  userId    String
+  tokenHash String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([tokenHash])
+  @@map("password_reset_tokens")
+}
+
+model Design {
+  id              String        @id @default(cuid())
+  slug            String        @unique
+  title           String
+  description     String?
+  category        String
+  styleTags       String[]
+  plotWidthFt     Int
+  plotLengthFt    Int
+  plotAreaSqft    Int
+  builtUpAreaSqft Int
+  floors          Int
+  bhk             Int
+  facing          Facing
+  priceInr        Int
+  status          DesignStatus  @default(DRAFT)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  files           DesignFile[]
+  images          DesignImage[]
+  orders          Order[]
+
+  @@index([category])
+  @@index([status])
+  @@index([priceInr])
+  @@index([plotWidthFt])
+  @@index([plotLengthFt])
+  @@index([category, status])
+  @@index([plotWidthFt, plotLengthFt])
+  @@map("designs")
+}
+
+model DesignImage {
+  id        String  @id @default(cuid())
+  designId  String
+  url       String
+  isPrimary Boolean @default(false)
+  sortOrder Int     @default(0)
+  altText   String?
+  design    Design  @relation(fields: [designId], references: [id], onDelete: Cascade)
+
+  @@index([designId])
+  @@map("design_images")
+}
+
+model DesignFile {
+  id         String     @id @default(cuid())
+  designId   String
+  fileType   FileType
+  storageKey String
+  version    String     @default("1.0")
+  sizeBytes  Int
+  design     Design     @relation(fields: [designId], references: [id], onDelete: Cascade)
+  downloads  Download[]
+
+  @@index([designId])
+  @@index([designId, fileType])
+  @@map("design_files")
+}
+
+model Order {
+  id                String      @id @default(cuid())
+  userId            String?
+  designId          String
+  email             String
+  amountInr         Int
+  status            OrderStatus @default(PENDING)
+  razorpayOrderId   String      @unique
+  razorpayPaymentId String?     @unique
+  invoiceNumber     String?     @unique
+  createdAt         DateTime    @default(now())
+  downloads         Download[]
+  design            Design      @relation(fields: [designId], references: [id])
+  user              User?       @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([designId])
+  @@index([email])
+  @@index([status])
+  @@map("orders")
+}
+
+model Download {
+  id           String     @id @default(cuid())
+  orderId      String
+  fileId       String
+  downloadedAt DateTime   @default(now())
+  ipAddress    String?
+  file         DesignFile @relation(fields: [fileId], references: [id], onDelete: Cascade)
+  order        Order      @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+  @@index([fileId])
+  @@map("downloads")
+}
+
+enum Role {
+  CUSTOMER
+  ADMIN
+}
+
+enum DesignStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum Facing {
+  N
+  S
+  E
+  W
+}
+
+enum FileType {
+  DWG
+  PDF
+  THREE_D
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
+model PendingUser {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  phone        String?
+  passwordHash String
+  otpHash      String
+  expiresAt    DateTime
+  createdAt    DateTime @default(now())
+
+  @@map("pending_users")
+}
