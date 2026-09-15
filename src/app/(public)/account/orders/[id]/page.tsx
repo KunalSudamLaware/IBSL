@@ -41,9 +41,7 @@ export default async function OrderConfirmationPage(props: PageProps) {
         }
       }
     }
-  });
-
-  if (!order) {
+}); if (!order || (order.userId !== session.user.id && session.user.role !== "ADMIN")) { return notFound(); } if (!order) {
     notFound();
   }
 

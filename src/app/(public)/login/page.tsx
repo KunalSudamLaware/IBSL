@@ -1,7 +1,7 @@
-﻿"use client";
+"use client";
 
 import { useState, Suspense } from "react";
-import { signIn } from "next-auth/react";
+
 import { useRouter, useSearchParams } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -28,21 +28,16 @@ function LoginFormContent() {
     setError("");
 
     try {
-      const res = await signIn("credentials", {
-        redirect: false,
-        email,
-        password,
-      });
+      const res = await fetch("/api/auth/login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email, password }) }); const data = await res.json();
 
-      if (res?.error) {
-        if (res.error === "EMAIL_NOT_VERIFIED") {
+      if (!res.ok) {
+        if (data.error === "EMAIL_NOT_VERIFIED") {
           setError("Please verify your email address before logging in.");
         } else {
           setError("Invalid email or password. Please try again.");
         }
-      } else if (res?.ok) {
-        router.refresh();
-        router.push(callbackUrl);
+      } else {
+        window.location.href = callbackUrl;
       }
     } catch {
       setError("An unexpected error occurred");
@@ -116,7 +111,7 @@ function LoginFormContent() {
             <Input
               id="password"
               type={showPassword ? "text" : "password"}
-              placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
+              placeholder="Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required

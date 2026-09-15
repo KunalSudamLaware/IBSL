@@ -1,11 +1,11 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Building2, Menu, X, LayoutDashboard, Compass, ShoppingCart, Users, LineChart, Settings, LogOut } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { signOut } from "next-auth/react";
+import { signOut } from "@/components/providers/AuthProvider";
 
 export function AdminNavbar() {
   const pathname = usePathname();
