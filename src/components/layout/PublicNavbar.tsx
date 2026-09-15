@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { Building2, Menu, X, LogOut, User, ShoppingBag } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { useSession, signOut } from "next-auth/react";
+import { useSession, signOut } from "@/components/providers/AuthProvider";
 
 export function PublicNavbar() {
   const pathname = usePathname();
@@ -27,7 +27,7 @@ export function PublicNavbar() {
   }
 
   const handleLogout = async () => {
-    await signOut({ redirect: false });
+    await signOut();
     router.refresh();
     router.push("/");
   };
