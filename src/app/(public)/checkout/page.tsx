@@ -67,80 +67,93 @@ export default async function CheckoutPage(props: PageProps) {
   };
 
   return (
-    <div className="bg-[#FAF9F6] py-12 text-slate-800 antialiased font-sans min-h-[80vh]">
-      <div className="mx-auto max-w-[1200px] px-6">
+    <div className="bg-[#FAF9F6] py-16 text-slate-800 antialiased font-sans min-h-[85vh] relative overflow-hidden">
+      
+      {/* Decorative Background */}
+      <div className="absolute top-0 left-0 w-full h-[350px] bg-gradient-to-b from-stone-100 to-transparent pointer-events-none -z-10" />
+
+      <div className="mx-auto max-w-[1100px] px-6">
         
         {/* Back Link */}
         <Link 
           href="/designs" 
-          className="inline-flex items-center text-xs font-bold uppercase tracking-widest text-[#b89047] hover:text-slate-900 mb-8 transition-colors"
+          className="inline-flex items-center text-[11px] font-bold uppercase tracking-widest text-stone-400 hover:text-slate-900 mb-8 transition-colors"
         >
-          <ArrowLeft className="w-4 h-4 mr-2" /> Back to Designs
+          <ArrowLeft className="w-3.5 h-3.5 mr-2" /> Back to Designs
         </Link>
         
         {/* Title */}
-        <div className="mb-10 pb-4 border-b border-stone-200">
-          <span className="text-[10px] font-bold tracking-[0.2em] text-[#b89047] uppercase block mb-1">Secure checkout</span>
-          <h1 className="text-3xl font-serif text-slate-900 font-normal tracking-tight">Checkout</h1>
+        <div className="mb-12 pb-6 border-b border-stone-200 flex items-end justify-between gap-6">
+          <div>
+            <span className="text-[10px] font-bold tracking-[0.2em] text-[#b89047] uppercase block mb-2">Secure Payment</span>
+            <h1 className="text-3xl md:text-4xl font-serif text-slate-900 font-bold tracking-tight">Checkout</h1>
+          </div>
+          <div className="hidden sm:flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-stone-400 bg-white border border-stone-200 px-4 py-2 rounded-lg shadow-sm">
+            <Lock className="w-3 h-3 text-[#b89047]" /> SSL Encrypted
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
           
           {/* Order Summary (5 columns on desktop) */}
-          <div className="lg:col-span-5 bg-white rounded-lg border border-stone-200 p-6 h-fit shadow-sm space-y-6">
-            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 pb-2 border-b border-stone-100">
-              Order Summary
-            </h2>
-            
-            <div className="space-y-4">
-              {selectedDesigns.map((design) => {
-                const primaryImage = design.images.find((img: any) => img.isPrimary) || design.images[0];
-                return (
-                  <div key={design.id} className="flex gap-4 pb-4 border-b border-stone-100 last:border-0 last:pb-0">
-                    {primaryImage && (
-                      <div className="w-20 h-15 rounded-lg overflow-hidden shrink-0 bg-stone-50 border border-stone-200">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={primaryImage.url} alt={design.title} className="w-full h-full object-cover" />
+          <div className="lg:col-span-5 w-full order-2 lg:order-1">
+            <div className="bg-white rounded-[24px] border border-stone-200/60 p-8 shadow-lg shadow-stone-200/50 sticky top-24">
+              <h2 className="text-[11px] font-bold uppercase tracking-widest text-slate-900 pb-4 border-b border-stone-150 mb-6">
+                Order Summary
+              </h2>
+              
+              <div className="space-y-5">
+                {selectedDesigns.map((design) => {
+                  const primaryImage = design.images.find((img: any) => img.isPrimary) || design.images[0];
+                  return (
+                    <div key={design.id} className="flex gap-4 pb-5 border-b border-stone-100 last:border-0 last:pb-0">
+                      {primaryImage && (
+                        <div className="w-[84px] h-[64px] rounded-xl overflow-hidden shrink-0 bg-stone-50 border border-stone-200/60 shadow-sm">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={primaryImage.url} alt={design.title} className="w-full h-full object-cover" />
+                        </div>
+                      )}
+                      <div className="min-w-0 flex-1 flex flex-col justify-center">
+                        <h3 className="font-serif font-bold text-sm text-slate-900 truncate mb-1">{design.title}</h3>
+                        <p className="text-[9px] text-stone-400 font-bold uppercase tracking-wider mb-1.5">
+                          {design.category} &bull; {design.bhk} BHK &bull; {design.facing} Facing
+                        </p>
+                        <span className="text-xs font-bold text-[#b89047] font-mono tracking-tight">{formatPrice(design.priceInr)}</span>
                       </div>
-                    )}
-                    <div className="min-w-0 flex-1">
-                      <h3 className="font-serif font-bold text-xs text-slate-900 truncate mb-1">{design.title}</h3>
-                      <p className="text-[9px] text-stone-500 font-semibold uppercase tracking-wider mb-0.5">
-                        {design.category} &bull; {design.bhk} BHK &bull; {design.facing} Facing
-                      </p>
-                      <span className="text-[10px] font-bold text-slate-900">{formatPrice(design.priceInr)}</span>
                     </div>
-                  </div>
-                );
-              })}
-            </div>
-            
-            <div className="border-t border-stone-100 pt-4 space-y-2 text-[10px] font-bold text-stone-400 uppercase tracking-widest">
-              <div className="flex justify-between">
-                <span>Design Subtotal</span>
-                <span className="text-slate-800 font-mono">{formatPrice(subtotal)}</span>
+                  );
+                })}
               </div>
-              <div className="flex justify-between">
-                <span>Taxes &amp; Fees</span>
-                <span className="text-slate-800">Included</span>
+              
+              <div className="border-t border-stone-150 mt-6 pt-5 space-y-3 text-[10px] font-bold text-stone-400 uppercase tracking-widest">
+                <div className="flex justify-between items-center">
+                  <span>Design Subtotal</span>
+                  <span className="text-slate-800 font-mono text-[11px]">{formatPrice(subtotal)}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span>Taxes &amp; Fees</span>
+                  <span className="text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded text-[9px]">Included</span>
+                </div>
               </div>
-            </div>
 
-            <div className="border-t border-stone-100 pt-4 flex justify-between items-end font-serif font-bold text-slate-900">
-              <span className="text-xs uppercase tracking-widest text-slate-900 font-semibold font-sans">Total Amount</span>
-              <span className="text-lg">{formatPrice(subtotal)}</span>
+              <div className="border-t border-stone-150 mt-5 pt-5 flex justify-between items-end font-serif font-bold text-slate-900">
+                <span className="text-[11px] uppercase tracking-widest text-slate-500 font-bold font-sans">Total Amount</span>
+                <span className="text-2xl tracking-tight">{formatPrice(subtotal)}</span>
+              </div>
             </div>
           </div>
 
           {/* Checkout Form (7 columns on desktop) */}
-          <div className="lg:col-span-7 bg-white rounded-lg border border-stone-200 p-8 shadow-sm">
-            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 mb-6 pb-2 border-b border-stone-100">
-              Customer Information
-            </h2>
-            <CheckoutClient 
-              designIds={selectedDesigns.map(d => d.id)} 
-              initialUser={initialUser}
-            />
+          <div className="lg:col-span-7 w-full order-1 lg:order-2">
+            <div className="bg-white rounded-[24px] border border-stone-200/60 p-8 md:p-10 shadow-lg shadow-stone-200/50">
+              <h2 className="text-[11px] font-bold uppercase tracking-widest text-slate-900 mb-8 pb-4 border-b border-stone-150">
+                Customer Information
+              </h2>
+              <CheckoutClient 
+                designIds={selectedDesigns.map(d => d.id)} 
+                initialUser={initialUser}
+              />
+            </div>
           </div>
         </div>
 

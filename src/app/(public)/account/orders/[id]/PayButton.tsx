@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Loader2, CreditCard } from "lucide-react";
+import { Loader2, CreditCard, AlertCircle } from "lucide-react";
 
 interface Props {
   orderId: string;
@@ -87,7 +87,7 @@ export function PayButton({ orderId }: Props) {
               throw new Error(verifyData.error || "Payment verification failed.");
             }
 
-            // Reload page on success
+            // Reload page on success to show the paid state
             router.refresh();
           } catch (err: any) {
             setError(err.message || "Payment verification failed.");
@@ -116,9 +116,10 @@ export function PayButton({ orderId }: Props) {
   };
 
   return (
-    <div className="space-y-3 w-full">
+    <div className="space-y-4 w-full animate-in fade-in duration-500">
       {error && (
-        <div className="p-3 text-xs font-semibold uppercase tracking-wider text-rose-700 bg-rose-50 border border-rose-100 rounded-lg text-center leading-relaxed">
+        <div className="p-4 text-[11px] font-bold uppercase tracking-widest text-rose-700 bg-rose-50 border border-rose-100 rounded-xl text-center shadow-sm flex items-center justify-center gap-2 animate-in fade-in zoom-in-95 duration-300">
+          <AlertCircle className="w-3.5 h-3.5" />
           {error}
         </div>
       )}
@@ -126,21 +127,33 @@ export function PayButton({ orderId }: Props) {
       <Button
         onClick={handlePay}
         disabled={loading}
-        className="w-full h-12 bg-[#b89047] hover:bg-[#b89047]/90 text-white text-xs font-bold tracking-widest uppercase rounded-lg shadow-md hover:shadow-lg transition-all border border-[#b89047] flex items-center justify-center gap-2"
+        className={`w-full h-14 text-xs font-bold tracking-widest uppercase text-white rounded-xl shadow-md transition-all border flex items-center justify-center gap-2 ${
+          loading 
+            ? "bg-slate-400 border-slate-400 cursor-not-allowed shadow-none" 
+            : "bg-slate-900 hover:bg-slate-800 hover:-translate-y-0.5 shadow-slate-900/20 border-slate-900"
+        }`}
       >
         {loading ? (
           <>
-            <Loader2 className="w-4 h-4 animate-spin" /> Preparing Checkout...
+            <Loader2 className="w-4 h-4 animate-spin text-white" /> 
+            <span className="opacity-90">Initializing Payment...</span>
           </>
         ) : (
           <>
-            <CreditCard className="w-4 h-4" /> Pay with Razorpay
+            <CreditCard className="w-4 h-4 text-[#b89047]" /> Pay with Razorpay
           </>
         )}
       </Button>
-      <p className="text-[9px] text-stone-400 font-bold uppercase tracking-wider text-center">
-        Demo test mode. Use simulated cards/netbanking credentials to process.
-      </p>
+      
+      <div className="flex flex-col items-center gap-1.5 pt-1 opacity-70 hover:opacity-100 transition-opacity">
+        <p className="text-[10px] text-stone-500 font-bold uppercase tracking-wider text-center">
+          Secure payment powered by Razorpay
+        </p>
+        <div className="flex gap-2 items-center">
+          {/* Subtle trust icons or flags can go here if needed */}
+          <span className="text-[8px] tracking-[0.2em] font-bold text-stone-400 uppercase">100% Secure Checkout</span>
+        </div>
+      </div>
     </div>
   );
 }

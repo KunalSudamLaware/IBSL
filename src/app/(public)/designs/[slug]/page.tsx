@@ -117,31 +117,31 @@ export default async function DesignDetailPage(props: PageProps) {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
           
           {/* Left Column: Image Gallery & Description */}
-          <div className="lg:col-span-7 space-y-12">
+          <div className="lg:col-span-7 space-y-12 animate-in fade-in slide-in-from-bottom-8 duration-1000 fill-mode-both">
             
             {/* Gallery Wrapper */}
-            <div className="bg-white rounded-lg border border-stone-200 p-2 shadow-sm">
+            <div className="bg-white rounded-[20px] border border-stone-200/60 p-2 shadow-md">
               <ImageGallery images={design.images} />
             </div>
             
             {/* Description */}
-            <section className="bg-white rounded-lg border border-stone-200 p-8 shadow-sm">
-              <h2 className="text-sm font-bold uppercase tracking-wider text-slate-900 mb-6 pb-2 border-b border-stone-150">
-                About This Design
+            <section className="bg-white rounded-[16px] border border-stone-200 p-8 shadow-sm group hover:border-[#b89047]/30 transition-colors duration-500">
+              <h2 className="text-sm font-bold uppercase tracking-wider text-slate-900 mb-6 pb-4 border-b border-stone-150 flex items-center gap-2">
+                <FileCheck className="w-4 h-4 text-[#b89047]" /> About This Design
               </h2>
-              <div className="text-stone-600 text-sm leading-relaxed whitespace-pre-wrap">
+              <div className="text-stone-600 text-[15px] leading-relaxed whitespace-pre-wrap">
                 {design.description || "A premium architectural house plan tailored for modern living."}
               </div>
             </section>
 
             {/* Specifications */}
-            <section className="bg-white rounded-lg border border-stone-200 p-8 shadow-sm">
-              <h2 className="text-sm font-bold uppercase tracking-wider text-slate-900 mb-6 pb-2 border-b border-stone-150">
-                Specifications &amp; Features
+            <section className="bg-white rounded-[16px] border border-stone-200 p-8 shadow-sm group hover:border-[#b89047]/30 transition-colors duration-500">
+              <h2 className="text-sm font-bold uppercase tracking-wider text-slate-900 mb-6 pb-4 border-b border-stone-150 flex items-center gap-2">
+                <Compass className="w-4 h-4 text-[#b89047]" /> Specifications &amp; Features
               </h2>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-6">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-y-8 gap-x-6">
                 {[
-                  { label: "Plot Size", val: `${design.plotWidthFt} Ã— ${design.plotLengthFt} ft` },
+                  { label: "Plot Size", val: `${design.plotWidthFt} × ${design.plotLengthFt} ft` },
                   { label: "Plot Area", val: `${design.plotAreaSqft.toLocaleString()} sq.ft` },
                   { label: "Built-up Area", val: `${design.builtUpAreaSqft.toLocaleString()} sq.ft` },
                   { label: "Bedrooms", val: `${design.bhk} BHK` },
@@ -158,8 +158,8 @@ export default async function DesignDetailPage(props: PageProps) {
                   { label: "Style Tags", val: design.styleTags.join(', ') || "Modern" }
                 ].map((spec, i) => (
                   <div key={i} className="flex flex-col">
-                    <span className="text-[9px] font-bold text-stone-400 uppercase tracking-widest mb-1">{spec.label}</span>
-                    <span className="text-xs font-semibold text-slate-900">{spec.val}</span>
+                    <span className="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-1">{spec.label}</span>
+                    <span className="text-[13px] font-semibold text-slate-900">{spec.val}</span>
                   </div>
                 ))}
               </div>
@@ -167,32 +167,35 @@ export default async function DesignDetailPage(props: PageProps) {
           </div>
 
           {/* Right Column: Buy Options */}
-          <div className="lg:col-span-5">
+          <div className="lg:col-span-5 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-150 fill-mode-both">
             <div className="sticky top-24 space-y-6">
               
               {/* Checkout Info Box */}
-              <div className="bg-white rounded-lg border border-stone-200 p-8 shadow-sm">
-                <span className="text-[10px] font-bold tracking-[0.2em] text-[#b89047] uppercase block mb-3">Instant Blueprint Access</span>
-                <h1 className="text-2xl font-serif font-bold text-slate-900 leading-tight mb-4">{design.title}</h1>
+              <div className="bg-white rounded-[16px] border border-stone-200/80 p-8 shadow-lg shadow-stone-200/50">
+                <span className="inline-block px-3 py-1 bg-stone-100 rounded-md text-[10px] font-bold tracking-[0.2em] text-[#b89047] uppercase mb-4">Instant Blueprint Access</span>
+                <h1 className="text-3xl font-serif font-bold text-slate-900 leading-[1.2] mb-5">{design.title}</h1>
                 
                 {/* Spec badges */}
                 <div className="flex flex-wrap gap-2 mb-6">
-                  <Badge variant="secondary" className="bg-stone-100 text-stone-700 border-none rounded-md text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5">
+                  <Badge variant="secondary" className="bg-stone-50 text-stone-600 border border-stone-200 rounded-md text-[10px] font-bold uppercase tracking-wider px-2.5 py-1">
                     {design.bhk} BHK
                   </Badge>
-                  <Badge variant="secondary" className="bg-stone-100 text-stone-700 border-none rounded-md text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5">
+                  <Badge variant="secondary" className="bg-stone-50 text-stone-600 border border-stone-200 rounded-md text-[10px] font-bold uppercase tracking-wider px-2.5 py-1">
                     {design.facing === 'N' ? 'North' : design.facing === 'S' ? 'South' : design.facing === 'E' ? 'East' : 'West'} Facing
                   </Badge>
-                  <Badge variant="secondary" className="bg-stone-100 text-stone-700 border-none rounded-md text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5">
+                  <Badge variant="secondary" className="bg-stone-50 text-stone-600 border border-stone-200 rounded-md text-[10px] font-bold uppercase tracking-wider px-2.5 py-1">
                     {design.floors} Floor{design.floors > 1 ? 's' : ''}
                   </Badge>
                 </div>
 
-                <div className="mb-6 pt-4 border-t border-stone-100">
-                  <span className="text-[9px] font-bold text-stone-400 uppercase tracking-widest block mb-1">Fixed Price</span>
-                  <div className="text-3xl font-bold text-slate-900">
-                    {formatPrice(design.priceInr)}
+                <div className="mb-8 pt-6 border-t border-stone-100 flex items-end justify-between">
+                  <div>
+                    <span className="text-[10px] font-bold text-stone-400 uppercase tracking-widest block mb-1">Fixed Price</span>
+                    <div className="text-3xl font-serif font-bold text-slate-900">
+                      {formatPrice(design.priceInr)}
+                    </div>
                   </div>
+                  <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest bg-emerald-50 px-2 py-1 rounded-md mb-1.5">Taxes Included</span>
                 </div>
 
                 {/* Purchase Actions (Wishlist + Cart + Buy Now) */}
@@ -202,30 +205,30 @@ export default async function DesignDetailPage(props: PageProps) {
                   priceInr={design.priceInr}
                 />
 
-                <div className="mt-6 flex flex-col gap-3 pt-6 border-t border-stone-100">
-                  <div className="flex items-center gap-2.5 text-stone-600 text-xs font-semibold uppercase tracking-wider">
+                <div className="mt-8 flex flex-col gap-3.5 pt-6 border-t border-stone-100">
+                  <div className="flex items-center gap-3 text-stone-600 text-xs font-semibold uppercase tracking-wider">
                     <Lock className="w-4 h-4 text-emerald-600 shrink-0" /> Secure Checkout
                   </div>
-                  <div className="flex items-center gap-2.5 text-stone-600 text-xs font-semibold uppercase tracking-wider">
+                  <div className="flex items-center gap-3 text-stone-600 text-xs font-semibold uppercase tracking-wider">
                     <Download className="w-4 h-4 text-[#b89047] shrink-0" /> Instant Digital Delivery
                   </div>
-                  <div className="flex items-center gap-2.5 text-stone-600 text-xs font-semibold uppercase tracking-wider">
+                  <div className="flex items-center gap-3 text-stone-600 text-xs font-semibold uppercase tracking-wider">
                     <ShieldCheck className="w-4 h-4 text-slate-900 shrink-0" /> Premium Architecture Quality
                   </div>
                 </div>
               </div>
 
               {/* What's Included Card */}
-              <div className="bg-stone-50/50 rounded-lg border border-stone-200 p-8 shadow-sm">
-                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 mb-4 pb-2 border-b border-stone-200">
+              <div className="bg-stone-50/80 rounded-[16px] border border-stone-200/60 p-8 shadow-sm">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 mb-5 pb-3 border-b border-stone-200">
                   What&apos;s Included
                 </h3>
-                <ul className="space-y-3.5">
+                <ul className="space-y-4">
                   {design.files.length > 0 ? (
                     design.files.map((file) => (
                       <li key={file.fileType} className="flex items-start gap-3">
-                        <CheckCircle2 className="w-4 h-4 text-[#b89047] shrink-0 mt-0.5" />
-                        <span className="text-xs font-semibold uppercase tracking-wider text-slate-700">
+                        <CheckCircle2 className="w-[18px] h-[18px] text-[#b89047] shrink-0 mt-0.5" />
+                        <span className="text-[13px] font-semibold text-slate-700 leading-snug">
                           {deliverableLabels[file.fileType] || file.fileType}
                         </span>
                       </li>
@@ -237,19 +240,19 @@ export default async function DesignDetailPage(props: PageProps) {
                   )}
                 </ul>
                 <div className="mt-6">
-                  <button className="flex items-center justify-center gap-2 w-full px-4 py-3 bg-white hover:bg-stone-100 text-slate-800 text-[10px] font-bold uppercase tracking-wider rounded-lg transition-colors border border-stone-200 shadow-sm">
-                    <FileDown className="w-4 h-4 text-[#b89047]" /> View Sample Blueprint (Watermarked)
+                  <button className="group flex items-center justify-center gap-2 w-full px-4 py-3.5 bg-white hover:bg-stone-100 text-slate-800 text-[10px] font-bold uppercase tracking-widest rounded-lg transition-colors border border-stone-200 shadow-sm">
+                    <FileDown className="w-4 h-4 text-[#b89047] group-hover:-translate-y-0.5 transition-transform" /> View Sample Blueprint
                   </button>
                 </div>
                 </div>
                 {/* Trust Section */}
               <div className="grid grid-cols-2 gap-4">
-                <div className="bg-white border border-stone-200 rounded-lg p-4 flex flex-col items-center justify-center text-center gap-2">
-                  <Clock className="w-5 h-5 text-stone-450" />
+                <div className="bg-white border border-stone-200 rounded-[12px] p-5 flex flex-col items-center justify-center text-center gap-2 hover:border-[#b89047]/30 transition-colors shadow-sm">
+                  <Clock className="w-5 h-5 text-stone-400" />
                   <span className="text-[9px] font-bold text-stone-500 uppercase tracking-widest">Instant Access</span>
                 </div>
-                <div className="bg-white border border-stone-200 rounded-lg p-4 flex flex-col items-center justify-center text-center gap-2">
-                  <HeadphonesIcon className="w-5 h-5 text-stone-450" />
+                <div className="bg-white border border-stone-200 rounded-[12px] p-5 flex flex-col items-center justify-center text-center gap-2 hover:border-[#b89047]/30 transition-colors shadow-sm">
+                  <HeadphonesIcon className="w-5 h-5 text-stone-400" />
                   <span className="text-[9px] font-bold text-stone-500 uppercase tracking-widest">Support</span>
                 </div>
               </div>
