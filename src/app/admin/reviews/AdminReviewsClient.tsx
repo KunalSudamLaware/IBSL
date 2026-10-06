@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Star, Trash2, Search, Loader2 } from "lucide-react";
+import { Star, Trash2, Search, Loader2, CheckCircle2, XCircle, Clock } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -10,6 +10,7 @@ interface ReviewDisplay {
   id: string;
   rating: number;
   comment: string | null;
+  status: "PENDING" | "APPROVED" | "REJECTED";
   createdAt: Date;
   user: { name: string; email: string };
   design: { title: string; slug: string };
@@ -19,7 +20,7 @@ export function AdminReviewsClient({ initialReviews }: { initialReviews: ReviewD
   const router = useRouter();
   const [reviews, setReviews] = useState(initialReviews);
   const [search, setSearch] = useState("");
-  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [loadingId, setLoadingId] = useState<string | null>(null);
 
   const filtered = reviews.filter(r => 
     r.user.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -28,10 +29,32 @@ export function AdminReviewsClient({ initialReviews }: { initialReviews: ReviewD
     (r.comment && r.comment.toLowerCase().includes(search.toLowerCase()))
   );
 
+  const handleUpdateStatus = async (id: string, status: "PENDING" | "APPROVED" | "REJECTED") => {
+    setLoadingId(id);
+    try {
+      const res = await fetch(`/api/admin/reviews/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status })
+      });
+      if (res.ok) {
+        setReviews(prev => prev.map(r => r.id === id ? { ...r, status } : r));
+        router.refresh();
+      } else {
+        const data = await res.json();
+        alert(data.error || "Failed to update review");
+      }
+    } catch (error) {
+      alert("Network error updating review");
+    } finally {
+      setLoadingId(null);
+    }
+  };
+
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to permanently delete this review?")) return;
     
-    setDeletingId(id);
+    setLoadingId(id);
     try {
       const res = await fetch(`/api/admin/reviews/${id}`, { method: "DELETE" });
       if (res.ok) {
@@ -44,7 +67,15 @@ export function AdminReviewsClient({ initialReviews }: { initialReviews: ReviewD
     } catch (error) {
       alert("Network error deleting review");
     } finally {
-      setDeletingId(null);
+      setLoadingId(null);
+    }
+  };
+
+  const StatusBadge = ({ status }: { status: string }) => {
+    switch (status) {
+      case 'APPROVED': return <span className="inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full"><CheckCircle2 className="w-3 h-3" /> Approved</span>;
+      case 'REJECTED': return <span className="inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider text-rose-600 bg-rose-50 px-2 py-1 rounded-full"><XCircle className="w-3 h-3" /> Rejected</span>;
+      default: return <span className="inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider text-amber-600 bg-amber-50 px-2 py-1 rounded-full"><Clock className="w-3 h-3" /> Pending</span>;
     }
   };
 
@@ -73,7 +104,7 @@ export function AdminReviewsClient({ initialReviews }: { initialReviews: ReviewD
                 <th className="py-4 px-6 font-medium">Design</th>
                 <th className="py-4 px-6 font-medium">Rating</th>
                 <th className="py-4 px-6 font-medium min-w-[200px]">Review</th>
-                <th className="py-4 px-6 font-medium">Date</th>
+                <th className="py-4 px-6 font-medium">Status</th>
                 <th className="py-4 px-6 font-medium text-right">Actions</th>
               </tr>
             </thead>
@@ -114,19 +145,39 @@ export function AdminReviewsClient({ initialReviews }: { initialReviews: ReviewD
                       <p className="text-stone-600 line-clamp-2 max-w-sm">{review.comment || "-"}</p>
                     </td>
                     <td className="py-4 px-6">
-                      <span className="text-[10px] font-semibold tracking-wider uppercase text-stone-500 whitespace-nowrap">
-                        {new Date(review.createdAt).toLocaleDateString()}
-                      </span>
+                      <StatusBadge status={review.status} />
                     </td>
-                    <td className="py-4 px-6 text-right">
-                      <button
-                        onClick={() => handleDelete(review.id)}
-                        disabled={deletingId === review.id}
-                        className="p-2 text-stone-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors disabled:opacity-50"
-                        title="Delete Review"
-                      >
-                        {deletingId === review.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
-                      </button>
+                    <td className="py-4 px-6 text-right space-x-2">
+                      <div className="flex items-center justify-end gap-1">
+                        {review.status !== "APPROVED" && (
+                          <button
+                            onClick={() => handleUpdateStatus(review.id, "APPROVED")}
+                            disabled={loadingId === review.id}
+                            className="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors disabled:opacity-50"
+                            title="Approve"
+                          >
+                            <CheckCircle2 className="w-4 h-4" />
+                          </button>
+                        )}
+                        {review.status !== "REJECTED" && (
+                          <button
+                            onClick={() => handleUpdateStatus(review.id, "REJECTED")}
+                            disabled={loadingId === review.id}
+                            className="p-1.5 text-amber-600 hover:bg-amber-50 rounded-lg transition-colors disabled:opacity-50"
+                            title="Reject/Hide"
+                          >
+                            <XCircle className="w-4 h-4" />
+                          </button>
+                        )}
+                        <button
+                          onClick={() => handleDelete(review.id)}
+                          disabled={loadingId === review.id}
+                          className="p-1.5 text-rose-600 hover:bg-rose-50 rounded-lg transition-colors disabled:opacity-50"
+                          title="Delete"
+                        >
+                          {loadingId === review.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))

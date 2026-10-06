@@ -24,6 +24,7 @@ export default async function HomePage() {
   // Fetch Featured Designs (up to 3 latest published)
   // try/catch guards against Neon idle-connection timeouts during build
   let featuredDesigns: FeaturedDesign[] = [];
+  let recentFeedback: any[] = [];
 
   try {
     featuredDesigns = await prisma.design.findMany({
@@ -37,8 +38,18 @@ export default async function HomePage() {
         },
       },
     });
+
+    recentFeedback = await prisma.review.findMany({
+      where: { status: "APPROVED" },
+      orderBy: { createdAt: "desc" },
+      take: 3,
+      include: {
+        user: { select: { name: true } },
+        design: { select: { title: true } }
+      }
+    });
   } catch (e) {
-    console.warn("[HomePage] DB fetch failed, rendering with empty designs:", e);
+    console.warn("[HomePage] DB fetch failed, rendering with empty data:", e);
   }
 
 
@@ -377,6 +388,47 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* ------------------------------------------------------------------ */}
+      {/* 7.5 WHAT OUR CUSTOMERS SAY */}
+      {/* ------------------------------------------------------------------ */}
+      {recentFeedback.length > 0 && (
+        <section className="py-24 bg-white border-b border-stone-200">
+          <div className="max-w-[1200px] mx-auto px-6">
+            <ScrollReveal direction="up" className="text-center max-w-2xl mx-auto mb-16">
+              <span className="text-[10px] font-bold tracking-[0.25em] text-[#b89047] uppercase block mb-3">Testimonials</span>
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif text-slate-900 font-normal tracking-tight mb-4">What Our Customers Say</h2>
+              <p className="text-[11px] text-stone-500 leading-relaxed uppercase font-bold tracking-widest max-w-lg mx-auto">
+                Real feedback from customers who purchased our designs.
+              </p>
+            </ScrollReveal>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {recentFeedback.map((feedback, idx) => (
+                <ScrollReveal key={feedback.id} delay={idx * 150} direction="up" className="bg-[#FAF9F6] border border-stone-200 p-8 rounded-2xl flex flex-col hover:-translate-y-1 hover:shadow-xl transition-all duration-300">
+                  <div className="flex gap-1 mb-6">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <Star key={star} className={`w-4 h-4 ${star <= feedback.rating ? 'fill-[#b89047] text-[#b89047]' : 'fill-stone-200 text-stone-200'}`} />
+                    ))}
+                  </div>
+                  <p className="text-sm text-slate-700 italic leading-relaxed mb-8 flex-1">
+                    "{feedback.comment || 'Great architectural design, highly recommended!'}"
+                  </p>
+                  <div className="pt-6 border-t border-stone-200">
+                    <p className="font-serif font-bold text-slate-900 mb-1">{feedback.user.name}</p>
+                    <div className="flex items-center gap-1 text-[10px] text-[#b89047] font-bold uppercase tracking-wider mb-2">
+                      <CheckCircle className="w-3 h-3" /> Verified Purchase
+                    </div>
+                    <p className="text-[10px] text-stone-400 font-bold uppercase tracking-wider">
+                      Design: {feedback.design.title}
+                    </p>
+                  </div>
+                </ScrollReveal>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* ------------------------------------------------------------------ */}
       {/* 8. FINAL CALL TO ACTION */}

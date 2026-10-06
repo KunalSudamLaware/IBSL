@@ -16,13 +16,13 @@ model User {
   createdAt               DateTime                 @default(now())
   emailVerified           Boolean                  @default(false)
   mobileVerified          Boolean                  @default(false)
+  consultations           ConsultationRequest[]
   emailVerificationTokens EmailVerificationToken[]
   mobileVerificationOtps  MobileVerificationOtp[]
   orders                  Order[]
-  wishlists               Wishlist[]
-  reviews                 Review[]
-  consultations           ConsultationRequest[]
   passwordResetTokens     PasswordResetToken[]
+  reviews                 Review[]
+  wishlists               Wishlist[]
 
   @@index([email])
   @@map("users")
@@ -68,8 +68,8 @@ model PasswordResetToken {
 }
 
 model Design {
-  id              String        @id @default(cuid())
-  slug            String        @unique
+  id              String                @id @default(cuid())
+  slug            String                @unique
   title           String
   description     String?
   category        String
@@ -82,15 +82,15 @@ model Design {
   bhk             Int
   facing          Facing
   priceInr        Int
-  status          DesignStatus  @default(DRAFT)
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
+  status          DesignStatus          @default(DRAFT)
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt
+  consultations   ConsultationRequest[]
   files           DesignFile[]
   images          DesignImage[]
   orders          Order[]
-  wishlists       Wishlist[]
   reviews         Review[]
-  consultations   ConsultationRequest[]
+  wishlists       Wishlist[]
 
   @@index([category])
   @@index([status])
@@ -142,9 +142,9 @@ model Order {
   invoiceNumber     String?     @unique
   createdAt         DateTime    @default(now())
   downloads         Download[]
-  reviews           Review[]
   design            Design      @relation(fields: [designId], references: [id])
   user              User?       @relation(fields: [userId], references: [id])
+  reviews           Review?
 
   @@index([userId])
   @@index([designId])
@@ -165,6 +165,90 @@ model Download {
   @@index([orderId])
   @@index([fileId])
   @@map("downloads")
+}
+
+model PendingUser {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  phone        String?
+  passwordHash String
+  otpHash      String
+  expiresAt    DateTime
+  createdAt    DateTime @default(now())
+
+  @@map("pending_users")
+}
+
+model Wishlist {
+  id        String   @id @default(cuid())
+  userId    String
+  designId  String
+  createdAt DateTime @default(now())
+  design    Design   @relation(fields: [designId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, designId])
+  @@index([userId])
+  @@index([designId])
+  @@map("wishlists")
+}
+
+enum ReviewStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model Review {
+  id        String       @id @default(cuid())
+  userId    String
+  designId  String
+  orderId   String       @unique
+  rating    Int
+  comment   String?
+  status    ReviewStatus @default(PENDING)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+  design    Design   @relation(fields: [designId], references: [id], onDelete: Cascade)
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, designId])
+  @@index([userId])
+  @@index([designId])
+  @@index([status])
+  @@map("reviews")
+}
+
+model ConsultationRequest {
+  id            String             @id @default(cuid())
+  userId        String?
+  designId      String?
+  name          String
+  email         String
+  mobile        String
+  message       String
+  preferredDate DateTime?
+  preferredTime String?
+  status        ConsultationStatus @default(PENDING)
+  adminNotes    String?
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+  design        Design?            @relation(fields: [designId], references: [id])
+  user          User?              @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([designId])
+  @@index([email])
+  @@index([status])
+  @@map("consultation_requests")
+}
+
+model playing_with_neon {
+  id    Int    @id @default(autoincrement())
+  name  String
+  value Float? @db.Real
 }
 
 enum Role {
@@ -194,62 +278,12 @@ enum FileType {
 enum OrderStatus {
   PENDING
   PAID
+  FAILED
+  REFUNDED
   PROCESSING
   READY
   COMPLETED
-  FAILED
-  REFUNDED
   CANCELLED
-}
-
-model PendingUser {
-  id           String   @id @default(cuid())
-  name         String
-  email        String   @unique
-  phone        String?
-  passwordHash String
-  otpHash      String
-  expiresAt    DateTime
-  createdAt    DateTime @default(now())
-
-  @@map("pending_users")
-}
-model Wishlist {
-  id        String   @id @default(cuid())
-  userId    String
-  designId  String
-  createdAt DateTime @default(now())
-
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  design    Design   @relation(fields: [designId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, designId])
-  @@index([userId])
-  @@index([designId])
-  @@map("wishlists")
-}
-
-
-
-model Review {
-  id        String   @id @default(cuid())
-  userId    String
-  designId  String
-  orderId   String
-  rating    Int
-  comment   String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  design    Design   @relation(fields: [designId], references: [id], onDelete: Cascade)
-  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, designId])
-  @@unique([orderId])
-  @@index([userId])
-  @@index([designId])
-  @@map("reviews")
 }
 
 enum ConsultationStatus {
@@ -258,29 +292,4 @@ enum ConsultationStatus {
   SCHEDULED
   COMPLETED
   CANCELLED
-}
-
-model ConsultationRequest {
-  id            String              @id @default(cuid())
-  userId        String?
-  designId      String?
-  name          String
-  email         String
-  mobile        String
-  message       String
-  preferredDate DateTime?
-  preferredTime String?
-  status        ConsultationStatus  @default(PENDING)
-  adminNotes    String?
-  createdAt     DateTime            @default(now())
-  updatedAt     DateTime            @updatedAt
-
-  user          User?               @relation(fields: [userId], references: [id], onDelete: SetNull)
-  design        Design?             @relation(fields: [designId], references: [id], onDelete: SetNull)
-
-  @@index([userId])
-  @@index([designId])
-  @@index([email])
-  @@index([status])
-  @@map("consultation_requests")
 }

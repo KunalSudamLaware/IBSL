@@ -2,11 +2,12 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import { buttonVariants } from "@/components/ui/button";
-import { CheckCircle2, Clock, Download, ArrowLeft, FileText, Lock, AlertTriangle, Hammer, PackageCheck, PackageOpen, XCircle } from "lucide-react";
+import { CheckCircle2, Clock, Download, ArrowLeft, FileText, Lock, AlertTriangle, Hammer, PackageCheck, PackageOpen, XCircle, Check } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { generateDownloadToken } from "@/lib/tokens";
 import { PayButton } from "./PayButton";
 import { DownloadPdfButton } from "./DownloadPdfButton";
+import { OrderFeedbackClient } from "./OrderFeedbackClient";
 import { formatPrice } from "@/lib/format";
 import { OrderStatus } from "@prisma/client";
 
@@ -66,6 +67,18 @@ export default async function OrderConfirmationPage(props: PageProps) {
       </div>
     );
   }
+
+  const userReview = await prisma.review.findUnique({
+    where: {
+      userId_designId: {
+        userId: session.user.id,
+        designId: order.designId
+      }
+    },
+    include: {
+      user: { select: { name: true } }
+    }
+  });
 
   const primaryImage = order.design.images[0];
   const isFailed = order.status === "FAILED";
@@ -205,7 +218,7 @@ export default async function OrderConfirmationPage(props: PageProps) {
                   <div className={`w-11 h-11 rounded-full flex items-center justify-center border-2 mb-3 bg-white transition-all duration-500 shadow-sm ${
                     currentIndex >= 4 ? "border-emerald-500 text-emerald-500 scale-110" : "border-stone-200 text-stone-300"
                   }`}>
-                    <PackageCheck className="w-5 h-5" />
+                    <Check className="w-5 h-5" />
                   </div>
                   <span className={`text-[10px] font-bold uppercase tracking-wider transition-colors ${currentIndex >= 4 ? "text-slate-900" : "text-stone-400"}`}>Completed</span>
                 </div>
@@ -292,6 +305,14 @@ export default async function OrderConfirmationPage(props: PageProps) {
               </div>
             )}
           </div>
+
+          {/* Feedback Section */}
+          <OrderFeedbackClient 
+            orderId={order.id}
+            designId={order.designId}
+            isPaid={isFullyPaid}
+            existingReview={userReview}
+          />
 
           {/* Customer Details Box */}
           <div className="bg-white p-6 rounded-2xl border border-stone-200/60 space-y-4 shadow-sm hidden">

@@ -17,7 +17,7 @@ export async function GET(
     if (sort === "lowest") orderBy = { rating: "asc" };
 
     const reviews = await prisma.review.findMany({
-      where: { designId: id },
+      where: { designId: id, status: "APPROVED" },
       include: {
         user: { select: { id: true, name: true } }
       },
@@ -25,26 +25,31 @@ export async function GET(
     });
 
     const aggregates = await prisma.review.aggregate({
-      where: { designId: id },
+      where: { designId: id, status: "APPROVED" },
       _avg: { rating: true },
       _count: { id: true }
     });
     
     const distribution = await prisma.review.groupBy({
       by: ['rating'],
-      where: { designId: id },
+      where: { designId: id, status: "APPROVED" },
       _count: { rating: true }
     });
     
     const distMap = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
-    distribution.forEach(d => { distMap[d.rating as keyof typeof distMap] = d._count.rating; });
+    distribution.forEach(d => { 
+      // @ts-ignore - Prisma dynamic aggregation type mismatch
+      distMap[d.rating as keyof typeof distMap] = d._count.rating || 0; 
+    });
 
     let userReview = null;
     let isEligible = false;
 
     const session = await auth();
     if (session?.user?.id) {
-      userReview = reviews.find(r => r.userId === session.user.id) || null;
+      userReview = await prisma.review.findUnique({
+        where: { userId_designId: { userId: session.user.id, designId: id } }
+      });
       
       // Check eligibility (has purchased this design and fully paid)
       if (!userReview) {
@@ -59,12 +64,17 @@ export async function GET(
       }
     }
 
+    // @ts-ignore - Prisma dynamic aggregation type mismatch
+    const totalCount = aggregates._count?.id || 0;
+    // @ts-ignore
+    const avgRating = aggregates._avg?.rating || 0;
+
     return NextResponse.json({ 
-      reviews: reviews.filter(r => r.userId !== session?.user?.id), // Exclude user's review from main list
+      reviews: reviews.filter(r => r.userId !== session?.user?.id),
       userReview,
-      isEligible, // Whether they can write a review right now
-      average: aggregates._avg.rating || 0,
-      total: aggregates._count.id,
+      isEligible,
+      average: avgRating,
+      total: totalCount,
       distribution: distMap
     });
   } catch (error) {
@@ -154,7 +164,8 @@ export async function PUT(
       where: { id: existing.id },
       data: {
         rating: parsed.data.rating,
-        comment: parsed.data.comment
+        comment: parsed.data.comment,
+        status: "PENDING"
       }
     });
 

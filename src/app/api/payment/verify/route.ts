@@ -85,7 +85,7 @@ export async function POST(req: Request) {
     const currentYear = new Date().getFullYear();
     const paidOrdersThisYear = await prisma.order.count({
       where: {
-        status: "PAID",
+        status: { in: ["PAID", "PROCESSING", "READY", "COMPLETED"] },
         createdAt: {
           gte: new Date(`${currentYear}-01-01T00:00:00.000Z`),
         }
@@ -98,13 +98,13 @@ export async function POST(req: Request) {
     const updatedOrder = await prisma.order.update({
       where: { id: order.id },
       data: {
-        status: "PAID",
+        status: "COMPLETED",
         razorpayPaymentId: razorpay_payment_id,
         invoiceNumber,
       },
     });
 
-    console.log(`[Verify Payment API] Order ${updatedOrder.id} successfully marked as PAID.`);
+    console.log(`[Verify Payment API] Order ${updatedOrder.id} successfully marked as COMPLETED.`);
 
     // 7. Trigger Delivery Email Pipeline (Invoice PDF + downloads)
     try {

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useSession, signOut } from "@/components/providers/AuthProvider";
-import { User, LogOut, Package, Heart, LayoutDashboard, Loader2, ArrowRight, MessageSquare } from "lucide-react";
+import { User, LogOut, Package, Heart, LayoutDashboard, Loader2, ArrowRight, MessageSquare, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -123,6 +123,9 @@ export default function AccountPage() {
           </Link>
           <Link href="/account/consultations" className="flex items-center gap-3 px-4 py-3 bg-white text-slate-650 hover:bg-stone-50 hover:text-slate-900 border border-stone-200 rounded-lg text-xs font-bold tracking-widest uppercase transition-colors">
             <MessageSquare className="w-4 h-4" /> Consultations
+          </Link>
+          <Link href="/account/feedback" className="flex items-center gap-3 px-4 py-3 bg-white text-slate-650 hover:bg-stone-50 hover:text-slate-900 border border-stone-200 rounded-lg text-xs font-bold tracking-widest uppercase transition-colors">
+            <Star className="w-4 h-4" /> Feedback
           </Link>
           <button 
             onClick={handleLogout}
