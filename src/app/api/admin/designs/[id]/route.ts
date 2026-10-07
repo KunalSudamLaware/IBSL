@@ -204,6 +204,17 @@ export async function PUT(req: Request, props: PageProps) {
     }
 
     // Database Transaction
+    // If we're uploading new deliverable files, we should clean up the old ones of the same type first
+    if (uploadedFiles.length > 0) {
+      const fileTypesToDelete = uploadedFiles.map(f => f.fileType);
+      await prisma.designFile.deleteMany({
+        where: {
+          designId: id,
+          fileType: { in: fileTypesToDelete }
+        }
+      });
+    }
+
     const updatedDesign = await prisma.design.update({
       where: { id },
       data: {

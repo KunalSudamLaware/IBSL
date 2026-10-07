@@ -12,7 +12,7 @@ const R2_ACCOUNT_ID = process.env.CLOUDFLARE_R2_ACCOUNT_ID || "";
 const R2_ACCESS_KEY_ID = process.env.CLOUDFLARE_R2_ACCESS_KEY_ID || "";
 const R2_SECRET_ACCESS_KEY = process.env.CLOUDFLARE_R2_SECRET_ACCESS_KEY || "";
 
-const hasR2 = !!R2_ACCESS_KEY_ID;
+const hasR2 = !!R2_ACCESS_KEY_ID && R2_ACCESS_KEY_ID !== "placeholder";
 
 export const r2Client = hasR2 ? new S3Client({
   region: "auto",

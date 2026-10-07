@@ -23,6 +23,7 @@ type Design = {
   priceInr: number;
   status: DesignStatus;
   images: { url: string; isPrimary: boolean }[];
+  files: { fileType: string }[];
 };
 
 interface DesignTableClientProps {
@@ -45,7 +46,7 @@ export function DesignTableClient({ designs }: DesignTableClientProps) {
       <tbody className="divide-y divide-stone-100">
         {designs.length === 0 ? (
           <tr>
-            <td colSpan={7} className="px-6 py-12 text-center text-stone-400 text-xs font-semibold uppercase tracking-widest italic">
+            <td colSpan={8} className="px-6 py-12 text-center text-stone-400 text-xs font-semibold uppercase tracking-widest italic">
               No designs found matching your criteria.
             </td>
           </tr>
@@ -111,6 +112,19 @@ export function DesignTableClient({ designs }: DesignTableClientProps) {
                 {design.status === "ARCHIVED" && (
                   <Badge variant="outline" className="bg-rose-50 text-rose-800 border-rose-250/20 rounded-md text-[9px] font-semibold uppercase tracking-wider px-2 py-0.5">
                     Archived
+                  </Badge>
+                )}
+              </td>
+
+              {/* PDF Status */}
+              <td className="px-6 py-4">
+                {design.files.some(f => f.fileType === "PDF") ? (
+                  <Badge variant="outline" className="bg-emerald-50 text-emerald-800 border-emerald-250/20 rounded-md text-[9px] font-semibold uppercase tracking-wider px-2 py-0.5">
+                    Available
+                  </Badge>
+                ) : (
+                  <Badge variant="outline" className="bg-rose-50 text-rose-800 border-rose-250/20 rounded-md text-[9px] font-semibold uppercase tracking-wider px-2 py-0.5">
+                    Not uploaded
                   </Badge>
                 )}
               </td>

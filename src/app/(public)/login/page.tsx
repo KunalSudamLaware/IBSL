@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, Suspense } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -9,7 +9,6 @@ import { Eye, EyeOff, ArrowLeft, ArrowRight, User, Loader2, CheckCircle2 } from 
 import Link from "next/link";
 
 function LoginFormContent() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/account/orders";
   const justRegistered = searchParams.get("registered") === "1";
@@ -108,15 +107,7 @@ function LoginFormContent() {
         
         {/* Password field */}
         <div className="space-y-2.5">
-          <div className="flex items-center justify-between">
-            <Label htmlFor="password" className="text-[11px] font-bold uppercase tracking-widest text-slate-800">Password</Label>
-            <Link
-              href="/forgot-password"
-              className="text-[10px] font-bold text-[#b89047] hover:text-[#8a6a32] transition-colors uppercase tracking-widest"
-            >
-              Forgot?
-            </Link>
-          </div>
+          <Label htmlFor="password" className="text-[11px] font-bold uppercase tracking-widest text-slate-800">Password</Label>
           <div className="relative group">
             <Input
               id="password"
@@ -135,6 +126,14 @@ function LoginFormContent() {
             >
               {showPassword ? <EyeOff className="w-[18px] h-[18px]" /> : <Eye className="w-[18px] h-[18px]" />}
             </button>
+          </div>
+          <div className="flex justify-end pt-0.5">
+            <Link
+              href="/forgot-password"
+              className="text-xs font-semibold text-[#b89047] hover:text-[#8a6a32] hover:underline transition-colors"
+            >
+              Forgot Password?
+            </Link>
           </div>
         </div>
 

@@ -330,10 +330,20 @@ export function DesignForm({ initialData, designId }: DesignFormProps) {
         <CardContent className="p-6 space-y-6">
           <div className="space-y-2">
             <Label htmlFor="dwgFile" className="text-xs font-semibold uppercase tracking-wider text-slate-700">DWG CAD File</Label>
+            {initialData?.files?.some((f: any) => f.fileType === "DWG") && !dwgFile && (
+              <div className="mb-2 flex items-center gap-2 p-2 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-lg text-[10px] font-bold uppercase tracking-widest w-fit">
+                <CheckCircle className="w-3.5 h-3.5" /> DWG Available
+              </div>
+            )}
             <Input id="dwgFile" name="dwgFile" type="file" accept=".dwg" onChange={(e) => setDwgFile(e.target.files?.[0] || null)} className="border-stone-250 file:bg-stone-100 file:text-slate-900 file:border-0 file:rounded-lg file:px-4 file:mr-4 file:font-semibold w-full h-11 file:h-11 file:cursor-pointer" />
           </div>
           <div className="space-y-2">
             <Label htmlFor="pdfFile" className="text-xs font-semibold uppercase tracking-wider text-slate-700">PDF File (Documentation & Floor Plan)</Label>
+            {initialData?.files?.some((f: any) => f.fileType === "PDF") && !pdfFile && (
+              <div className="mb-2 flex items-center gap-2 p-2 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-lg text-[10px] font-bold uppercase tracking-widest w-fit">
+                <CheckCircle className="w-3.5 h-3.5" /> PDF Available
+              </div>
+            )}
             <Input id="pdfFile" name="pdfFile" type="file" accept=".pdf" onChange={(e) => setPdfFile(e.target.files?.[0] || null)} className="border-stone-250 file:bg-stone-100 file:text-slate-900 file:border-0 file:rounded-lg file:px-4 file:mr-4 file:font-semibold w-full h-11 file:h-11 file:cursor-pointer" />
           </div>
           <div className="space-y-2">

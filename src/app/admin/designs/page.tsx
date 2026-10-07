@@ -52,6 +52,7 @@ export default async function AdminDesignsPage(props: { searchParams: SearchPara
         where: { isPrimary: true },
         take: 1,
       },
+      files: true,
     },
     orderBy,
   });
@@ -116,6 +117,7 @@ export default async function AdminDesignsPage(props: { searchParams: SearchPara
                 <th className="px-6 py-4">Specs</th>
                 <th className="px-6 py-4">Price</th>
                 <th className="px-6 py-4">Status</th>
+                <th className="px-6 py-4">PDF</th>
                 <th className="px-6 py-4 text-right">Actions</th>
               </tr>
             </thead>

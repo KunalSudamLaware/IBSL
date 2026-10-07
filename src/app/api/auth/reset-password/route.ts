@@ -5,65 +5,80 @@ import crypto from "crypto";
 import { z } from "zod";
 import { isPasswordStrong, PASSWORD_ERROR_MESSAGE } from "@/lib/password";
 
-const resetSchema = z.object({
-  token: z.string().min(1, "Token is required"),
-  password: z
-    .string()
-    .min(8, "Password must be at least 8 characters")
-    .refine(isPasswordStrong, PASSWORD_ERROR_MESSAGE),
-  confirmPassword: z.string(),
-}).refine((d) => d.password === d.confirmPassword, {
+const resetPasswordSchema = z.object({
+  token: z.string().min(1, "Reset token is required"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
+  confirmPassword: z.string().min(8, "Confirm Password is required")
+}).refine(data => data.password === data.confirmPassword, {
   message: "Passwords do not match",
   path: ["confirmPassword"],
 });
 
 export async function POST(req: Request) {
   try {
-    const body = await req.json();
-    const parsed = resetSchema.safeParse(body);
+    let body: unknown;
+    try {
+      body = await req.json();
+    } catch {
+      return NextResponse.json({ error: "Invalid request payload." }, { status: 400 });
+    }
 
+    const parsed = resetPasswordSchema.safeParse(body);
     if (!parsed.success) {
-      return NextResponse.json(
-        { error: parsed.error.issues[0].message },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: parsed.error.issues[0]?.message || "Invalid input." }, { status: 400 });
     }
 
     const { token, password } = parsed.data;
 
-    // Hash the incoming raw token and look it up
+    // Validate strong password
+    if (!isPasswordStrong(password)) {
+      return NextResponse.json({ error: PASSWORD_ERROR_MESSAGE }, { status: 400 });
+    }
+
+    // Hash the token exactly like we did when generating it in verify/route.ts
     const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
 
-    const record = await prisma.passwordResetToken.findUnique({
+    // Lookup token securely
+    const resetTokenRecord = await prisma.passwordResetToken.findUnique({
       where: { tokenHash },
+      include: { user: true },
     });
 
-    if (!record) {
-      return NextResponse.json({ error: "Invalid or expired reset link." }, { status: 400 });
+    if (!resetTokenRecord) {
+      return NextResponse.json({ error: "Invalid or expired reset link. Please request a new password reset." }, { status: 400 });
     }
 
-    if (record.expiresAt < new Date()) {
-      await prisma.passwordResetToken.delete({ where: { tokenHash } });
-      return NextResponse.json({ error: "This reset link has expired. Please request a new one." }, { status: 400 });
+    if (resetTokenRecord.expiresAt < new Date()) {
+      await prisma.passwordResetToken.delete({ where: { id: resetTokenRecord.id } });
+      return NextResponse.json({ error: "This password reset link has expired. Please request a new one." }, { status: 400 });
     }
 
-    // Hash new password — never store plain text
+    // Securely hash the new password using bcrypt
     const passwordHash = await bcrypt.hash(password, 10);
 
-    // Update password + invalidate all reset tokens for this user
-    await prisma.$transaction([
-      prisma.user.update({
-        where: { id: record.userId },
+    // Update user's password securely within a transaction
+    await prisma.$transaction(async (tx) => {
+      await tx.user.update({
+        where: { id: resetTokenRecord.userId },
         data: { passwordHash },
-      }),
-      prisma.passwordResetToken.deleteMany({
-        where: { userId: record.userId },
-      }),
-    ]);
+      });
 
-    return NextResponse.json({ message: "Password reset successfully. You can now log in." });
-  } catch (e) {
-    console.error("[reset-password]", e);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+      // Invalidate the reset token
+      await tx.passwordResetToken.delete({
+        where: { id: resetTokenRecord.id },
+      });
+
+      // Invalidate any old OTPs for this user's email just to be fully clean
+      await tx.passwordResetOtp.updateMany({
+        where: { email: resetTokenRecord.user.email, usedAt: null },
+        data: { usedAt: new Date() },
+      });
+    });
+
+    return NextResponse.json({ success: true, message: "Password reset successfully." }, { status: 200 });
+
+  } catch (error) {
+    console.error("[reset-password] Unexpected error:", error);
+    return NextResponse.json({ error: "Internal server error. Please try again." }, { status: 500 });
   }
 }

@@ -3,7 +3,13 @@
 import { useState } from "react";
 import { Download, FileText, Loader2 } from "lucide-react";
 
-export function DownloadPdfButton({ orderId }: { orderId: string }) {
+interface DownloadPdfButtonProps {
+  orderId: string;
+  endpoint: string;
+  label: string;
+}
+
+export function DownloadPdfButton({ orderId, endpoint, label }: DownloadPdfButtonProps) {
   const [downloading, setDownloading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -11,7 +17,7 @@ export function DownloadPdfButton({ orderId }: { orderId: string }) {
     setDownloading(true);
     setError(null);
     try {
-      const response = await fetch(`/api/orders/${orderId}/pdf`);
+      const response = await fetch(endpoint);
       
       if (!response.ok) {
         const errData = await response.json().catch(() => null);
@@ -22,7 +28,7 @@ export function DownloadPdfButton({ orderId }: { orderId: string }) {
       const blob = await response.blob();
       
       // Get filename from Content-Disposition header if available
-      let filename = `Morya-Designs-Order-${orderId.slice(0, 8).toUpperCase()}.pdf`;
+      let filename = `Morya-Designs-${label.replace(/\s+/g, '-')}-${orderId.slice(0, 8).toUpperCase()}.pdf`;
       const disposition = response.headers.get('content-disposition');
       if (disposition && disposition.indexOf('filename=') !== -1) {
         const matches = /filename="([^"]+)"/.exec(disposition);
@@ -50,28 +56,28 @@ export function DownloadPdfButton({ orderId }: { orderId: string }) {
   };
 
   return (
-    <div className="flex flex-col gap-2">
-      <div className="flex items-center justify-between p-3 border border-stone-200 rounded-lg bg-white text-xs font-semibold text-slate-700">
-        <span className="flex items-center gap-2">
-          <FileText className="w-4 h-4 text-[#b89047]" /> Documentation & Plot Layout (PDF)
+    <div className="flex flex-col gap-2 w-full">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 border border-stone-200/80 rounded-xl bg-white text-xs font-bold text-slate-700 shadow-sm gap-3 sm:gap-0">
+        <span className="flex items-center gap-2.5">
+          <FileText className="w-4 h-4 text-[#b89047]" /> {label}
         </span>
         
         <button
           onClick={handleDownload}
           disabled={downloading}
-          className="text-[#b89047] hover:text-slate-900 uppercase tracking-wider text-[10px] font-bold flex items-center gap-1 transition-colors disabled:opacity-50"
+          className="text-[#b89047] hover:text-slate-900 uppercase tracking-widest text-[10px] font-bold flex items-center gap-1.5 transition-colors disabled:opacity-50"
         >
           {downloading ? (
-            <>Downloading... <Loader2 className="w-3.5 h-3.5 animate-spin" /></>
+            <>DOWNLOADING... <Loader2 className="w-3.5 h-3.5 animate-spin" /></>
           ) : (
-            <>Download <Download className="w-3.5 h-3.5" /></>
+            <>DOWNLOAD PDF <Download className="w-3.5 h-3.5" /></>
           )}
         </button>
       </div>
       {error && (
-        <p className="text-[10px] font-bold text-rose-600 tracking-wider">
+        <span className="text-[10px] text-rose-600 font-bold uppercase tracking-wider ml-1 mt-1 block">
           {error}
-        </p>
+        </span>
       )}
     </div>
   );

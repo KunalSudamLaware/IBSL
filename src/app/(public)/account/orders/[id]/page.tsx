@@ -294,16 +294,58 @@ export default async function OrderConfirmationPage(props: PageProps) {
               <Download className="w-4 h-4 text-[#b89047]" /> Design Deliverables
             </h3>
             
-            {isFullyPaid ? <DownloadPdfButton orderId={order.id} /> : (
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 border border-stone-200/80 rounded-xl bg-white text-xs font-bold text-slate-700 shadow-sm gap-3 sm:gap-0">
-                <span className="flex items-center gap-2.5">
-                  <FileText className="w-4 h-4 text-[#b89047]" /> Documentation & Plot Layout (PDF)
-                </span>
-                <span className="text-stone-400 uppercase tracking-widest text-[10px] font-bold flex items-center gap-1.5 select-none bg-stone-50 px-3 py-1.5 rounded-lg border border-stone-100">
-                  Locked <Lock className="w-3.5 h-3.5 text-stone-300" />
-                </span>
-              </div>
+            {/* Order Receipt */}
+            {!isFailed && !isCancelled && !isRefunded && (
+              <DownloadPdfButton 
+                orderId={order.id} 
+                endpoint={`/api/orders/${order.id}/pdf`} 
+                label="Order Receipt" 
+              />
             )}
+
+            {/* Purchased Design PDF */}
+            {(() => {
+              const hasPdf = order.design.files.some(f => f.fileType === "PDF");
+              
+              if (!hasPdf) {
+                return (
+                  <div className="flex flex-col gap-2 w-full">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 border border-stone-200/80 rounded-xl bg-white text-xs font-bold text-slate-700 shadow-sm gap-3 sm:gap-0">
+                      <span className="flex items-center gap-2.5">
+                        <FileText className="w-4 h-4 text-[#b89047]" /> Design PDF
+                      </span>
+                      <span className="text-stone-400 uppercase tracking-widest text-[10px] font-bold flex items-center gap-1.5 select-none bg-stone-50 px-3 py-1.5 rounded-lg border border-stone-100">
+                        PDF NOT AVAILABLE YET <Lock className="w-3.5 h-3.5 text-stone-300" />
+                      </span>
+                    </div>
+                    <span className="text-[10px] text-rose-600 font-bold uppercase tracking-wider ml-1 mt-1 block">
+                      The design PDF is not available yet. Please check again later.
+                    </span>
+                  </div>
+                );
+              }
+
+              if (isFullyPaid) {
+                return (
+                  <DownloadPdfButton 
+                    orderId={order.id} 
+                    endpoint={`/api/orders/${order.id}/design-pdf`} 
+                    label="Design PDF Ready" 
+                  />
+                );
+              }
+
+              return (
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 border border-stone-200/80 rounded-xl bg-white text-xs font-bold text-slate-700 shadow-sm gap-3 sm:gap-0">
+                  <span className="flex items-center gap-2.5">
+                    <FileText className="w-4 h-4 text-[#b89047]" /> ?? Design PDF Locked
+                  </span>
+                  <span className="text-stone-400 uppercase tracking-widest text-[10px] font-bold flex items-center gap-1.5 select-none bg-stone-50 px-3 py-1.5 rounded-lg border border-stone-100">
+                    Complete payment to access your design <Lock className="w-3.5 h-3.5 text-stone-300" />
+                  </span>
+                </div>
+              );
+            })()}
           </div>
 
           {/* Feedback Section */}

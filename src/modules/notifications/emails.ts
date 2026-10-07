@@ -1,4 +1,4 @@
-﻿import { resend } from "@/lib/resend";
+import { resend } from "@/lib/resend";
 import { generateOrderAccessToken } from "@/lib/tokens";
 import nodemailer from "nodemailer";
 
@@ -135,10 +135,132 @@ Morya Designs`,
 </html>
       `,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Nodemailer Error:", error);
     throw error;
   }
 }
+
+// ─── Password Reset OTP ──────────────────────────────────────────────────────────
+
+export async function sendPasswordResetOtpEmail(
+  to: string,
+  customerName: string,
+  otp: string
+) {
+  const subject = "Morya Designs - Password Reset Verification Code";
+  const textContent = `Hello ${customerName || "there"},
+
+We received a request to reset the password for your Morya Designs account.
+
+Your Morya Designs verification code is: ${otp}
+
+This code will expire in 10 minutes.
+Do not share this code with anyone.
+
+If you did not request a password reset, you can safely ignore this email. Your password will remain unchanged.
+
+Best regards,
+Morya Designs`;
+
+  const htmlContent = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+</head>
+<body style="margin:0;padding:0;background-color:#FAF9F6;font-family:Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#FAF9F6;padding:40px 0;">
+    <tr>
+      <td align="center">
+        <table width="580" cellpadding="0" cellspacing="0" style="background:#ffffff;border:1px solid #e7e5e4;border-radius:12px;overflow:hidden;">
+          <tr>
+            <td style="background-color:#0f172a;padding:32px 40px;text-align:center;">
+              <p style="margin:0;color:#b89047;font-size:11px;font-weight:700;letter-spacing:0.25em;text-transform:uppercase;">Morya Designs</p>
+              <h1 style="margin:8px 0 0;color:#ffffff;font-size:22px;font-weight:400;letter-spacing:0.02em;">Password Reset Verification</h1>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:40px 40px 32px;">
+              <h2 style="margin:0 0 20px;color:#0f172a;font-size:20px;font-weight:400;">Hello${customerName ? `, ${customerName}` : ""}</h2>
+              <p style="margin:0 0 16px;color:#44403c;font-size:14px;line-height:1.7;">
+                We received a request to reset the password for your <strong>Morya Designs</strong> account.<br/>
+                Your Morya Designs verification code is:
+              </p>
+              <div style="text-align:center;padding:28px 0;">
+                <div style="display:inline-block;background-color:#f1f5f9;color:#0f172a;border:1px dashed #cbd5e1;font-size:28px;font-weight:700;letter-spacing:0.35em;padding:16px 36px;border-radius:8px;">
+                  ${otp}
+                </div>
+              </div>
+              <p style="margin:0 0 8px;color:#78716c;font-size:12px;line-height:1.6;">
+                This code will expire in <strong>10 minutes</strong>.<br/>
+                <strong>Do not share this code with anyone.</strong>
+              </p>
+              <p style="margin:16px 0 0;color:#94a3b8;font-size:11px;line-height:1.6;">
+                If you did not request a password reset, you can safely ignore this email. Your password will remain unchanged.
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+  `;
+
+  let sent = false;
+  let lastError: unknown = null;
+
+  // 1. Try Resend if API key is configured
+  const resendApiKey = process.env.RESEND_API_KEY;
+  if (resendApiKey && resendApiKey !== "placeholder" && resendApiKey !== "re_mock_key") {
+    try {
+      const res = await resend.emails.send({
+        from: FROM_EMAIL,
+        to,
+        subject,
+        text: textContent,
+        html: htmlContent,
+      });
+      if (res.error) {
+        throw new Error(res.error.message);
+      }
+      sent = true;
+    } catch (err) {
+      console.warn("Resend email failed, attempting nodemailer fallback:", err);
+      lastError = err;
+    }
+  }
+
+  // 2. Fallback to Nodemailer if Resend wasn't successful
+  if (!sent) {
+    const emailUser = process.env.EMAIL_USER;
+    const emailPass = process.env.EMAIL_PASS;
+    if (emailUser && emailPass) {
+      const transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+          user: emailUser,
+          pass: emailPass,
+        },
+      });
+      await transporter.sendMail({
+        from: `"Morya Designs" <${emailUser}>`,
+        to,
+        subject,
+        text: textContent,
+        html: htmlContent,
+      });
+      sent = true;
+    }
+  }
+
+  if (!sent && lastError) {
+    throw lastError;
+  }
+}
+
 
 

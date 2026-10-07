@@ -12,7 +12,7 @@ export default async function EditDesignPage(props: PageProps) {
   
   const design = await prisma.design.findUnique({
     where: { id: params.id },
-    include: { images: true }
+    include: { images: true, files: true }
   });
 
   if (!design) {
