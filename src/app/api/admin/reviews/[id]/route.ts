@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { revalidatePath } from "next/cache";
 
 export async function PATCH(
   req: Request,
@@ -22,9 +23,12 @@ export async function PATCH(
 
     const review = await prisma.review.update({
       where: { id },
-      data: { status }
+      data: { status },
+      include: { design: { select: { slug: true } } }
     });
 
+    revalidatePath('/designs/' + review.design.slug);
+    revalidatePath('/designs/' + review.design.slug, 'page');
     return NextResponse.json({ success: true, review });
   } catch (error) {
     console.error("[PATCH /api/admin/reviews/[id]]", error);
@@ -45,6 +49,7 @@ export async function DELETE(
     const { id } = await params;
 
     const review = await prisma.review.findUnique({
+      include: { design: { select: { slug: true } } },
       where: { id }
     });
 
@@ -55,6 +60,8 @@ export async function DELETE(
     await prisma.review.delete({
       where: { id }
     });
+    revalidatePath('/designs/' + review.design.slug);
+    revalidatePath('/designs/' + review.design.slug, 'page');
 
     return NextResponse.json({ success: true });
   } catch (error) {

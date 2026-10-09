@@ -1,3 +1,4 @@
+import { Star } from "lucide-react";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getDesignBySlug } from "@/modules/catalog/queries";
@@ -141,7 +142,7 @@ export default async function DesignDetailPage(props: PageProps) {
               </h2>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-y-8 gap-x-6">
                 {[
-                  { label: "Plot Size", val: `${design.plotWidthFt} × ${design.plotLengthFt} ft` },
+                  { label: "Plot Size", val: `${design.plotWidthFt} Ã ${design.plotLengthFt} ft` },
                   { label: "Plot Area", val: `${design.plotAreaSqft.toLocaleString()} sq.ft` },
                   { label: "Built-up Area", val: `${design.builtUpAreaSqft.toLocaleString()} sq.ft` },
                   { label: "Bedrooms", val: `${design.bhk} BHK` },
@@ -173,7 +174,24 @@ export default async function DesignDetailPage(props: PageProps) {
               {/* Checkout Info Box */}
               <div className="bg-white rounded-[16px] border border-stone-200/80 p-8 shadow-lg shadow-stone-200/50">
                 <span className="inline-block px-3 py-1 bg-stone-100 rounded-md text-[10px] font-bold tracking-[0.2em] text-[#b89047] uppercase mb-4">Instant Blueprint Access</span>
-                <h1 className="text-3xl font-serif font-bold text-slate-900 leading-[1.2] mb-5">{design.title}</h1>
+                <h1 className="text-3xl font-serif font-bold text-slate-900 leading-[1.2] mb-3">{design.title}</h1>
+                {/* Feedback Display */}
+                <div className="flex items-center gap-2 mb-5">
+                  {design.reviews.length > 0 ? (
+                    <>
+                      <div className="flex items-center gap-0.5">
+                        {[1, 2, 3, 4, 5].map((s) => (
+                          <Star key={s} className={`w-4 h-4 ${s <= Math.round(design.reviews.reduce((a, b) => a + b.rating, 0) / design.reviews.length) ? "fill-[#b89047] text-[#b89047]" : "fill-stone-200 text-stone-200"}`} />
+                        ))}
+                      </div>
+                      <span className="text-xs font-bold text-slate-700">{(design.reviews.reduce((a, b) => a + b.rating, 0) / design.reviews.length).toFixed(1)}</span>
+                      <span className="text-[10px] uppercase tracking-widest text-stone-400 font-semibold mx-1"></span>
+                      <a href="#reviews" className="text-xs font-semibold uppercase tracking-widest text-stone-500 hover:text-[#b89047] transition-colors">{design.reviews.length} Approved Review{design.reviews.length > 1 ? "s" : ""}</a>
+                    </>
+                  ) : (
+                    <a href="#reviews" className="text-xs font-semibold uppercase tracking-widest text-stone-500 hover:text-[#b89047] transition-colors">No reviews yet. Be the first to share your experience.</a>
+                  )}
+                </div>
                 
                 {/* Spec badges */}
                 <div className="flex flex-wrap gap-2 mb-6">
@@ -261,7 +279,7 @@ export default async function DesignDetailPage(props: PageProps) {
           </div>
         </div>
 
-        <ReviewSection designId={design.id} />
+        <div id="reviews"><ReviewSection designId={design.id} /></div>
 
         {/* Related Designs */}
         {relatedDesigns.length > 0 && (
@@ -302,7 +320,7 @@ export default async function DesignDetailPage(props: PageProps) {
                     <div className="p-6 flex flex-col flex-1">
                       <div className="flex justify-between items-center mb-3">
                         <span className="text-xs font-semibold tracking-wider uppercase text-[#b89047]">{relDesign.facing} Facing</span>
-                        <span className="text-xs font-medium text-stone-500">{relDesign.plotWidthFt}Ã—{relDesign.plotLengthFt} ft Plot</span>
+                        <span className="text-xs font-medium text-stone-500">{relDesign.plotWidthFt}Ãâ{relDesign.plotLengthFt} ft Plot</span>
                       </div>
                       
                       <Link href={`/designs/${relDesign.slug}`} className="block mb-4">

@@ -93,13 +93,17 @@ export async function getDesignBySlug(slug: string) {
     where: { slug, status: DesignStatus.PUBLISHED },
     include: {
       images: {
-        orderBy: [{ isPrimary: 'desc' }, { sortOrder: 'asc' }],
+        orderBy: [{ isPrimary: "desc" }, { sortOrder: "asc" }],
       },
       files: {
         select: {
           fileType: true,
           sizeBytes: true,
         }
+      },
+      reviews: {
+        where: { status: "APPROVED" },
+        select: { rating: true }
       }
     },
   });

@@ -309,7 +309,7 @@ export function ReviewSection({ designId }: ReviewSectionProps) {
             ))}
             {reviews.length === 0 && (
                <div className="text-center py-12">
-                 <p className="text-sm text-stone-500">No public reviews are available for this design yet.</p>
+                 <p className="text-sm text-stone-500">No reviews yet. Be the first to share your experience.</p>
                </div>
             )}
           </div>
