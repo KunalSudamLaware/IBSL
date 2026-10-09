@@ -62,7 +62,7 @@ export async function POST(req: Request) {
       // Determine the next invoice number safely within a transaction or simple count
       const paidOrdersThisYear = await prisma.order.count({
         where: {
-          status: "PAID",
+          status: { in: ["PAID", "PROCESSING", "READY", "COMPLETED"] },
           createdAt: {
             gte: new Date(`${currentYear}-01-01T00:00:00.000Z`),
           }

@@ -31,7 +31,8 @@ export async function GET(req: Request, props: Params) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    if (order.status !== "PAID") {
+    const paidStatuses = ["PAID", "PROCESSING", "READY", "COMPLETED"];
+    if (!paidStatuses.includes(order.status)) {
       return NextResponse.json({ error: "Order is not paid" }, { status: 400 });
     }
 

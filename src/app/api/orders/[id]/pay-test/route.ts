@@ -31,7 +31,8 @@ export async function POST(req: Request, props: Params) {
       return NextResponse.json({ error: "Forbidden: Access denied" }, { status: 403 });
     }
 
-    if (order.status === "PAID") {
+    const paidStatuses = ["PAID", "PROCESSING", "READY", "COMPLETED"];
+    if (paidStatuses.includes(order.status)) {
       return NextResponse.json({ message: "Order is already paid" });
     }
 

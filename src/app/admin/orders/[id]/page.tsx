@@ -5,6 +5,7 @@ import { ArrowLeft, User, FileText, CheckCircle2, Clock } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { formatPrice } from "@/lib/format";
 import { StatusUpdater } from "./StatusUpdater";
+import { ReconcileButton } from "./ReconcileButton";
 
 type PageProps = {
   params: Promise<{ id: string }>;
@@ -135,11 +136,14 @@ export default async function AdminOrderDetailPage(props: PageProps) {
               </div>
             </div>
             {order.status === "PENDING" && (
-              <div className="text-[10px] bg-amber-50 border border-amber-250/20 text-amber-900 p-4 rounded-lg leading-relaxed">
-                Awaiting client callback or webhook capturing. Use the public order link to run simulated payment verification.
-              </div>
+              <>
+                <div className="text-[10px] bg-amber-50 border border-amber-250/20 text-amber-900 p-4 rounded-lg leading-relaxed">
+                  Awaiting client callback or webhook capturing. Use the public order link to run simulated payment verification.
+                </div>
+                {order.razorpayOrderId && <ReconcileButton orderId={order.id} />}
+              </>
             )}
-            {order.status === "PAID" && (
+            {["PAID", "PROCESSING", "READY", "COMPLETED"].includes(order.status) && (
               <div className="mt-4 pt-4 border-t border-stone-250/60 space-y-3 text-[10px] uppercase font-bold tracking-wider text-stone-500">
                 <div>
                   <span className="block text-stone-400 font-semibold text-[9px] mb-0.5">Razorpay Order ID</span>

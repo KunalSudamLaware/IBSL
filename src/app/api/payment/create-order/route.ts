@@ -35,7 +35,8 @@ export async function POST(req: Request) {
     }
 
     // 3. Verify order is still unpaid
-    if (order.status === "PAID") {
+    const paidStatuses = ["PAID", "PROCESSING", "READY", "COMPLETED"];
+    if (paidStatuses.includes(order.status)) {
       return NextResponse.json({ error: "Order is already paid" }, { status: 400 });
     }
 

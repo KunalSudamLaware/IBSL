@@ -35,8 +35,9 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Forbidden: Access denied" }, { status: 403 });
     }
 
-    if (order.status === "PAID") {
-      return NextResponse.json({ message: "Order is already paid" });
+    const paidStatuses = ["PAID", "PROCESSING", "READY", "COMPLETED"];
+    if (paidStatuses.includes(order.status)) {
+      return NextResponse.json({ success: true, message: "Order is already paid" });
     }
 
     if (order.razorpayOrderId !== razorpay_order_id) {
