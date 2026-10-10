@@ -3,9 +3,57 @@ import Link from "next/link";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { IndianRupee, ShoppingCart, LayoutGrid, Activity, Calendar, RefreshCcw, Plus, Users, Settings, ArrowRight, FolderOpen, AlertCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { DashboardFilter } from "./DashboardFilter";
 import { formatPrice } from "@/lib/format";
 
-export default async function AdminDashboardPage() {
+type Props = {
+  searchParams: Promise<{ range?: string }>;
+};
+
+export default async function AdminDashboardPage(props: Props) {
+  const searchParams = await props.searchParams;
+  const range = searchParams.range || "last_30_days";
+
+  const now = new Date();
+  let gte: Date | undefined;
+  let lte: Date | undefined;
+
+  switch (range) {
+    case "last_month": {
+      const firstDay = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+      const lastDay = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59, 999);
+      gte = firstDay;
+      lte = lastDay;
+      break;
+    }
+    case "last_3_months": {
+      gte = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
+      break;
+    }
+    case "last_6_months": {
+      gte = new Date(now.getTime() - 180 * 24 * 60 * 60 * 1000);
+      break;
+    }
+    case "last_12_months": {
+      gte = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
+      break;
+    }
+    case "this_year": {
+      gte = new Date(now.getFullYear(), 0, 1);
+      break;
+    }
+    case "all_time": {
+      gte = undefined;
+      break;
+    }
+    case "last_30_days":
+    default: {
+      gte = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+      break;
+    }
+  }
+
+  const dateFilter = gte ? { createdAt: { gte, ...(lte && { lte }) } } : {};
   const [
     totalRevenueAgg,
     totalSalesCount,
@@ -26,10 +74,10 @@ export default async function AdminDashboardPage() {
   ] = await Promise.all([
     prisma.order.aggregate({
       _sum: { amountInr: true },
-      where: { status: "PAID" },
+      where: { status: "PAID", ...dateFilter },
     }),
     prisma.order.count({
-      where: { status: "PAID" },
+      where: { status: "PAID", ...dateFilter },
     }),
     prisma.design.count({
       where: { status: "PUBLISHED" },
@@ -41,14 +89,15 @@ export default async function AdminDashboardPage() {
       where: { status: "ARCHIVED" },
     }),
     prisma.order.findMany({
+      where: dateFilter,
       orderBy: { createdAt: "desc" },
       take: 6,
       include: { design: true },
     }),
-    prisma.order.count(),
-    prisma.order.count({ where: { status: "PENDING" } }),
-    prisma.order.count({ where: { status: "FAILED" } }),
-    prisma.order.count({ where: { status: "REFUNDED" } }),
+    prisma.order.count({ where: dateFilter }),
+    prisma.order.count({ where: { status: "PENDING", ...dateFilter } }),
+    prisma.order.count({ where: { status: "FAILED", ...dateFilter } }),
+    prisma.order.count({ where: { status: "REFUNDED", ...dateFilter } }),
     prisma.design.findMany({
       where: { status: "PUBLISHED" },
       take: 3,
@@ -59,10 +108,10 @@ export default async function AdminDashboardPage() {
       by: ['category'],
       _count: { id: true }
     }),
-    prisma.user.count({ where: { role: "CUSTOMER" } }),
-    prisma.review.count(),
-    prisma.consultationRequest.count(),
-    prisma.wishlist.count(),
+    prisma.user.count({ where: { role: "CUSTOMER", ...dateFilter } }),
+    prisma.review.count({ where: dateFilter }),
+    prisma.consultationRequest.count({ where: dateFilter }),
+    prisma.wishlist.count({ where: dateFilter }),
   ]);
 
   const totalRevenue = totalRevenueAgg._sum.amountInr || 0;
@@ -93,11 +142,9 @@ export default async function AdminDashboardPage() {
           
           <div className="flex items-center gap-3 shrink-0">
             <span className="text-[10px] font-bold text-stone-405 uppercase tracking-widest flex items-center gap-1.5 bg-white border border-stone-200 px-3 py-1.5 rounded-lg">
-              <Calendar className="w-3.5 h-3.5 text-[#b89047]" /> Last updated: {new Date().toLocaleDateString("en-IN")}
+              <Calendar className="w-3.5 h-3.5 text-[#b89047]" /> Last updated: {new Date().toLocaleString("en-IN", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit", second: "2-digit" })}
             </span>
-            <button className="text-xs font-bold tracking-wider uppercase text-slate-700 hover:text-slate-900 bg-white border border-stone-250 px-4 py-2.5 rounded-lg flex items-center gap-1 shadow-sm transition-colors cursor-pointer">
-              Last 30 Days <span className="text-[10px] text-[#b89047]">▼</span>
-            </button>
+            <DashboardFilter />
           </div>
         </div>
         <p className="text-xs text-stone-500 mt-4 italic font-semibold">
