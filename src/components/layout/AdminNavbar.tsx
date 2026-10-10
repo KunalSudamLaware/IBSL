@@ -32,7 +32,7 @@ export function AdminNavbar() {
     { href: "/admin/orders", label: "Orders", icon: ShoppingCart },
     { href: "/admin/consultations", label: "Consults", icon: MessageSquare },
     { href: "/admin/customers", label: "Customers", icon: Users },
-    { href: "/admin/analytics", label: "Analytics", icon: LineChart },
+    { href: "/admin/analytics", label: "Reports & Analytics", icon: LineChart },
     { href: "/admin/reviews", label: "Reviews", icon: Star },
     { href: "/admin/settings", label: "Settings", icon: Settings },
   ];

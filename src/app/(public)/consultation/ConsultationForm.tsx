@@ -4,10 +4,18 @@ import { useState } from "react";
 import { Loader2, ArrowRight, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { getProjectTodayDateString, validateConsultationDate } from "@/lib/date";
 import Link from "next/link";
 
+interface ConsultationDesign {
+  id: string;
+  title: string;
+  slug?: string;
+  images?: Array<{ url: string }>;
+}
+
 interface ConsultationFormProps {
-  design: any;
+  design: ConsultationDesign | null;
   userDetails: { name: string; email: string; mobile: string } | null;
 }
 
@@ -23,11 +31,30 @@ export function ConsultationForm({ design, userDetails }: ConsultationFormProps)
   
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [dateError, setDateError] = useState("");
   const [success, setSuccess] = useState(false);
   const [consultationId, setConsultationId] = useState("");
 
+  // Minimum date is dynamically computed in the project timezone (Asia/Kolkata)
+  const minDate = getProjectTodayDateString();
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+
+    if (name === "preferredDate") {
+      if (value) {
+        const validation = validateConsultationDate(value);
+        if (!validation.valid) {
+          setDateError(validation.error || "Preferred consultation date cannot be in the past.");
+        } else {
+          setDateError("");
+          if (error.includes("date")) setError("");
+        }
+      } else {
+        setDateError("");
+      }
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -42,6 +69,17 @@ export function ConsultationForm({ design, userDetails }: ConsultationFormProps)
     if (!/^[0-9]{10}$/.test(formData.mobile)) {
       setError("Mobile number must be exactly 10 digits.");
       return;
+    }
+
+    // Validate preferredDate if selected
+    if (formData.preferredDate) {
+      const dateValidation = validateConsultationDate(formData.preferredDate);
+      if (!dateValidation.valid) {
+        const errMessage = dateValidation.error || "Preferred consultation date cannot be in the past. Please select today or a future date.";
+        setError(errMessage);
+        setDateError(errMessage);
+        return;
+      }
     }
 
     setLoading(true);
@@ -60,8 +98,9 @@ export function ConsultationForm({ design, userDetails }: ConsultationFormProps)
       
       setConsultationId(data.consultation.id);
       setSuccess(true);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Failed to submit request.";
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -153,14 +192,31 @@ export function ConsultationForm({ design, userDetails }: ConsultationFormProps)
         </div>
         <div></div>
         <div>
-          <label className="text-[10px] font-bold uppercase tracking-widest text-stone-500 block mb-2">Preferred Date (Optional)</label>
+          <label htmlFor="preferredDate" className="text-[10px] font-bold uppercase tracking-widest text-stone-500 block mb-2">
+            Preferred Date (Optional)
+          </label>
           <Input 
+            id="preferredDate"
             name="preferredDate"
             type="date"
+            min={minDate}
             value={formData.preferredDate}
             onChange={handleChange}
-            className="h-11 border-stone-200 focus-visible:ring-[#b89047]"
+            className={`h-11 border-stone-200 focus-visible:ring-[#b89047] ${
+              dateError ? "border-rose-400 focus-visible:ring-rose-400 text-rose-900" : ""
+            }`}
+            aria-invalid={!!dateError}
+            aria-describedby={dateError ? "date-error-msg" : "date-help-msg"}
           />
+          {dateError ? (
+            <p id="date-error-msg" className="text-[11px] font-semibold text-rose-600 mt-1.5">
+              {dateError}
+            </p>
+          ) : (
+            <p id="date-help-msg" className="text-[10px] text-stone-400 mt-1 font-medium">
+              Select today or any upcoming date
+            </p>
+          )}
         </div>
         <div>
           <label className="text-[10px] font-bold uppercase tracking-widest text-stone-500 block mb-2">Preferred Time (Optional)</label>

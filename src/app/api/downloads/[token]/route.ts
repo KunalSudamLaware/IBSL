@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { verifyDownloadToken } from "@/lib/tokens";
-import { getSignedDownloadUrl } from "@/lib/r2";
+import { getSignedDownloadUrl, objectExistsInR2 } from "@/lib/r2";
 import { downloadRateLimiter } from "@/lib/rate-limit";
 import fs from "fs";
 import path from "path";
@@ -41,7 +41,8 @@ export async function GET(req: Request, props: Params) {
       }
     });
     
-    if (!order || order.status !== "PAID") {
+    const paidStatuses = ["PAID", "PROCESSING", "READY", "COMPLETED"];
+    if (!order || !paidStatuses.includes(order.status)) {
       return NextResponse.json({ error: "Unauthorized: Order is not marked as PAID" }, { status: 403 });
     }
 
@@ -60,8 +61,10 @@ export async function GET(req: Request, props: Params) {
     });
 
     const isR2Enabled = !!process.env.CLOUDFLARE_R2_ACCESS_KEY_ID;
+    const bucket = process.env.CLOUDFLARE_R2_PRIVATE_BUCKET || "private";
+    const existsInR2 = isR2Enabled ? await objectExistsInR2(bucket, file.storageKey) : false;
 
-    if (!isR2Enabled) {
+    if (!isR2Enabled || !existsInR2) {
       // Check if local file exists on disk
       const localFilePath = path.join(process.cwd(), "public", "uploads", file.storageKey);
       
@@ -100,7 +103,6 @@ export async function GET(req: Request, props: Params) {
     }
 
     // 4. Generate S3 Presigned URL (Valid for 15 mins)
-    const bucket = process.env.CLOUDFLARE_R2_PRIVATE_BUCKET!;
     const signedUrl = await getSignedDownloadUrl(bucket, file.storageKey, 900);
 
     // 5. Secure Redirect to the Presigned URL

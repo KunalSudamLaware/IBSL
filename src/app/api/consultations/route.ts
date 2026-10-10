@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { validateConsultationDate } from "@/lib/date";
 import { z } from "zod";
 
 const consultationSchema = z.object({
@@ -25,6 +26,14 @@ export async function POST(req: Request) {
 
     const { name, email, mobile, message, designId, preferredDate, preferredTime } = parsed.data;
 
+    // Validate preferredDate: ensure it's not in the past
+    if (preferredDate && preferredDate.trim()) {
+      const dateValidation = validateConsultationDate(preferredDate);
+      if (!dateValidation.valid) {
+        return NextResponse.json({ error: dateValidation.error }, { status: 400 });
+      }
+    }
+
     const request = await prisma.consultationRequest.create({
       data: {
         userId: session?.user?.id || null,
@@ -38,8 +47,6 @@ export async function POST(req: Request) {
       }
     });
 
-    // TODO: Send email notification
-
     return NextResponse.json({ success: true, consultation: request }, { status: 201 });
   } catch (error) {
     console.error("[POST /api/consultations]", error);
@@ -47,7 +54,7 @@ export async function POST(req: Request) {
   }
 }
 
-export async function GET(req: Request) {
+export async function GET() {
   try {
     const session = await auth();
     if (!session?.user?.id) {

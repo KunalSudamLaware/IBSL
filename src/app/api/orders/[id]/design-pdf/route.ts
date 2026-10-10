@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { getSignedDownloadUrl } from "@/lib/r2";
+import { getSignedDownloadUrl, objectExistsInR2 } from "@/lib/r2";
 import fs from "fs";
 import path from "path";
 
@@ -49,7 +49,15 @@ export async function GET(req: Request, props: Params) {
     }
 
     const bucket = process.env.CLOUDFLARE_R2_PRIVATE_BUCKET || "private";
-    const signedUrl = await getSignedDownloadUrl(bucket, pdfFile.storageKey, 60);
+    const existsInR2 = await objectExistsInR2(bucket, pdfFile.storageKey);
+
+    let signedUrl = "";
+    if (existsInR2) {
+      signedUrl = await getSignedDownloadUrl(bucket, pdfFile.storageKey, 60);
+    } else {
+      // Return relative local path if not in R2
+      signedUrl = `/uploads/${pdfFile.storageKey}`;
+    }
 
     // If it's a local fallback (starts with /uploads), we should stream it directly
     if (signedUrl.startsWith("/")) {

@@ -3,6 +3,7 @@ import {
   PutObjectCommand,
   GetObjectCommand,
   DeleteObjectCommand,
+  HeadObjectCommand,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import fs from "fs";
@@ -23,12 +24,20 @@ export const r2Client = hasR2 ? new S3Client({
   },
 }) : null;
 
+function enforceProductionR2() {
+  if (!hasR2 && process.env.NODE_ENV === "production") {
+    throw new Error("Missing Cloudflare R2 configuration. Local upload fallback is not supported in production.");
+  }
+}
+
 export async function uploadToR2(
   bucket: string,
   key: string,
   body: Buffer | Uint8Array | string,
   contentType: string
 ) {
+  enforceProductionR2();
+
   if (!hasR2) {
     const uploadPath = path.join(process.cwd(), "public", "uploads", key);
     const dir = path.dirname(uploadPath);
@@ -55,7 +64,9 @@ export async function getSignedDownloadUrl(
   expiresIn = 3600
 ) {
   if (!hasR2) {
-    // Return relative local path instead of R2 URL
+    // If running locally, return local path unless we strictly enforce production
+    // Wait, existing files might be local even if we are in production if it's migrating?
+    // Let's just return the relative path for local development
     return `/uploads/${key}`;
   }
 
@@ -90,8 +101,20 @@ export async function uploadPrivateDeliverable(
   contentType: string = "application/octet-stream"
 ) {
   const bucket = process.env.CLOUDFLARE_R2_PRIVATE_BUCKET || "private";
-  const key = `deliverables/${Date.now()}-${fileName}`;
+  // Safely format the filename to avoid spaces and special chars issues in S3 keys
+  const safeName = fileName.replace(/[^a-zA-Z0-9.-]/g, "_");
+  const key = `deliverables/${Date.now()}-${safeName}`;
   
   await uploadToR2(bucket, key, fileBuffer, contentType);
   return { key, bucket };
+}
+
+export async function objectExistsInR2(bucket: string, key: string) {
+  if (!hasR2) return false;
+  try {
+    await r2Client!.send(new HeadObjectCommand({ Bucket: bucket, Key: key }));
+    return true;
+  } catch (err) {
+    return false;
+  }
 }

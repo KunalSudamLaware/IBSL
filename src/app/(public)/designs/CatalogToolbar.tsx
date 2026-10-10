@@ -15,19 +15,28 @@ export function CatalogToolbar() {
   const [isFocused, setIsFocused] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  // Sync input value if searchParam changes externally
+  useEffect(() => {
+    setSearch(searchParams.get("search") || "");
+  }, [searchParams]);
+
   // Debounce search input
   useEffect(() => {
     const timer = setTimeout(() => {
-      if (search !== (searchParams.get("search") || "")) {
+      const currentParam = searchParams.get("search") || "";
+      if (search.trim() !== currentParam) {
         const params = new URLSearchParams(searchParams.toString());
-        if (search) params.set("search", search);
-        else params.delete("search");
+        if (search.trim()) {
+          params.set("search", search.trim());
+        } else {
+          params.delete("search");
+        }
         params.delete("page"); // Reset page on new search
         startTransition(() => {
-          router.push(`?${params.toString()}`);
+          router.push(`/designs${params.toString() ? `?${params.toString()}` : ""}`);
         });
       }
-    }, 500);
+    }, 400);
     return () => clearTimeout(timer);
   }, [search, searchParams, router]);
 
@@ -35,8 +44,9 @@ export function CatalogToolbar() {
     if (!value) return;
     const params = new URLSearchParams(searchParams.toString());
     params.set("sort", value);
+    params.delete("page");
     startTransition(() => {
-      router.push(`?${params.toString()}`);
+      router.push(`/designs?${params.toString()}`);
     });
   };
 
@@ -52,7 +62,7 @@ export function CatalogToolbar() {
         className={`relative flex-1 rounded-xl transition-all duration-300 ${
           isFocused 
             ? "shadow-[0_0_0_2px_rgba(184,144,71,0.2)] bg-white ring-1 ring-[#b89047]" 
-            : "shadow-sm bg-white hover:border-stone-300 ring-1 ring-stone-200"
+            : "shadow-xs bg-white hover:border-stone-300 ring-1 ring-stone-200"
         }`}
       >
         <div className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center justify-center">
@@ -76,8 +86,9 @@ export function CatalogToolbar() {
         {/* Clear Button */}
         {search && (
           <button 
+            type="button"
             onClick={handleClear}
-            className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-stone-400 hover:text-rose-500 bg-stone-50 hover:bg-rose-50 rounded-full transition-colors focus:outline-none"
+            className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-stone-400 hover:text-rose-500 bg-stone-50 hover:bg-rose-50 rounded-full transition-colors focus:outline-none cursor-pointer"
             aria-label="Clear search"
           >
             <X className="w-3.5 h-3.5" />
@@ -86,18 +97,20 @@ export function CatalogToolbar() {
       </div>
       
       {/* Sort Select */}
-      <div className="w-full sm:w-[240px] shrink-0">
+      <div className="w-full sm:w-[250px] shrink-0">
         <Select 
           value={searchParams.get("sort") || "newest"} 
           onValueChange={handleSortChange}
         >
-          <SelectTrigger className="h-12 text-xs font-bold uppercase tracking-wider rounded-xl border-stone-200 bg-white shadow-sm focus:ring-2 focus:ring-[#b89047]/20 focus:border-[#b89047] transition-all">
+          <SelectTrigger className="h-12 text-xs font-bold uppercase tracking-wider rounded-xl border-stone-200 bg-white shadow-xs focus:ring-2 focus:ring-[#b89047]/20 focus:border-[#b89047] transition-all">
             <SelectValue placeholder="Sort by" />
           </SelectTrigger>
           <SelectContent className="rounded-xl border-stone-200 shadow-lg">
             <SelectItem value="newest" className="text-xs uppercase tracking-wider font-semibold py-2.5">Sort by: Newest</SelectItem>
             <SelectItem value="price_asc" className="text-xs uppercase tracking-wider font-semibold py-2.5">Price: Low to High</SelectItem>
             <SelectItem value="price_desc" className="text-xs uppercase tracking-wider font-semibold py-2.5">Price: High to Low</SelectItem>
+            <SelectItem value="area_desc" className="text-xs uppercase tracking-wider font-semibold py-2.5">Plot: Large to Small</SelectItem>
+            <SelectItem value="area_asc" className="text-xs uppercase tracking-wider font-semibold py-2.5">Plot: Small to Large</SelectItem>
           </SelectContent>
         </Select>
       </div>
