@@ -16,7 +16,7 @@ export async function sendOrderDeliveryEmail(
   const orderAccessUrl = `${BASE_URL}/orders/access?token=${orderToken}`;
 
   await resend.emails.send({
-    from: "Morya Design Firm <onboarding@resend.dev>",
+    from: "Morya Designs <onboarding@resend.dev>",
     to: order.email,
     subject: `Your Design is Ready: ${design.title} (Order #${order.invoiceNumber})`,
     html: `

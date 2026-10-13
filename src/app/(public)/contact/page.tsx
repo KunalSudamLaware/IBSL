@@ -51,7 +51,7 @@ export default function ContactPage() {
           <h2 className="text-sm font-bold uppercase tracking-wider text-slate-900 mb-2">Corporate Office</h2>
           <p className="text-xs text-stone-500 uppercase tracking-widest font-semibold mb-4">Headquarters</p>
           <div className="text-xs text-stone-500 leading-relaxed font-semibold">
-            Morya Design Firm<br/>
+            Morya Designs<br/>
             123 Architecture Lane<br/>
             Mumbai, MH 400001 • India
           </div>

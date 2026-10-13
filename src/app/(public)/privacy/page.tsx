@@ -13,7 +13,7 @@ export default function PrivacyPolicyPage() {
         <div className="prose prose-stone max-w-none text-sm text-stone-600 leading-relaxed space-y-8">
           <div>
             <h2 className="text-sm font-bold uppercase tracking-wider text-slate-900 mb-2">1. Information We Collect</h2>
-            <p>When you purchase an architectural design from Morya Design Firm, we collect your email address and payment details via Razorpay to process and deliver your digital files.</p>
+            <p>When you purchase an architectural design from Morya Designs, we collect your email address and payment details via Razorpay to process and deliver your digital files.</p>
           </div>
           
           <div>

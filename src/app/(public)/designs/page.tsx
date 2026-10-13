@@ -7,8 +7,11 @@ import { DesignCard } from "@/components/shared/DesignCard";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Browse Architectural House Designs | Morya Designs",
+  title: "Browse Architectural House Designs",
   description: "Explore our collection of customizable, Vastu-compliant house plans, 3D elevations, and architectural designs.",
+  alternates: {
+    canonical: "/designs",
+  }
 };
 
 type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;

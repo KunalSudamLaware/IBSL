@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -46,11 +46,7 @@ export function ImageGallery({ images }: Props) {
           onClick={() => setIsLightboxOpen(true)}
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img 
-            src={images[activeIndex].url} 
-            alt={images[activeIndex].altText || "Design Preview"} 
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-          />
+          <img src={images[activeIndex].url} alt={images[activeIndex].altText || "Design Preview"} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80"; }} />
           <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 bg-black/20 transition-opacity pointer-events-none">
             <span className="bg-white/95 text-slate-900 px-5 py-2.5 rounded-lg text-xs font-bold uppercase tracking-widest shadow-xl flex items-center gap-2">
               <Maximize2 className="w-4 h-4" /> Expand Gallery
@@ -71,7 +67,7 @@ export function ImageGallery({ images }: Props) {
                 )}
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={img.url} alt="Thumbnail" className="w-full h-full object-cover" />
+                <img src={img.url} alt="Thumbnail" className="w-full h-full object-cover" onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80"; }} />
               </button>
             ))}
           </div>
@@ -90,11 +86,7 @@ export function ImageGallery({ images }: Props) {
           
           <div className="relative w-full h-full flex items-center justify-center p-4 md:p-12">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img 
-              src={images[activeIndex].url} 
-              alt={images[activeIndex].altText || "Fullscreen preview"} 
-              className="max-w-full max-h-full object-contain"
-            />
+            <img src={images[activeIndex].url} alt={images[activeIndex].altText || "Fullscreen preview"} className="max-w-full max-h-full object-contain" onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80"; }} />
             
             {images.length > 1 && (
               <>

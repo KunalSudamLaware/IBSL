@@ -13,7 +13,7 @@ export default function TermsOfServicePage() {
         <div className="prose prose-stone max-w-none text-sm text-stone-600 leading-relaxed space-y-8">
           <div>
             <h2 className="text-sm font-bold uppercase tracking-wider text-slate-900 mb-2">1. Digital Products</h2>
-            <p>Morya Design Firm provides digital architectural blueprints, including DWG, PDF, and 3D rendering formats. Upon successful payment, these files are delivered instantly.</p>
+            <p>Morya Designs provides digital architectural blueprints, including DWG, PDF, and 3D rendering formats. Upon successful payment, these files are delivered instantly.</p>
           </div>
           
           <div>

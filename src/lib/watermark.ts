@@ -61,7 +61,7 @@ export async function processAndUploadPublicImage(
   fileName: string
 ): Promise<{ url: string; key: string }> {
   const watermarkedBuffer = await applyWatermark(fileBuffer, {
-    text: "MORYA DESIGN FIRM - PREVIEW ONLY",
+    text: "Morya Designs - PREVIEW ONLY",
     opacity: 0.3,
   });
 

@@ -1,19 +1,22 @@
-import { MetadataRoute } from 'next'
+import { MetadataRoute } from 'next';
 
 export default function robots(): MetadataRoute.Robots {
-  const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000'
-  
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://moryadesigns.com';
+
   return {
     rules: {
       userAgent: '*',
       allow: '/',
       disallow: [
-        '/admin/', 
-        '/api/', 
-        '/account/', 
-        '/orders/access'
+        '/admin/',
+        '/account/',
+        '/cart/',
+        '/api/',
+        '/checkout/',
+        '/orders/access/',
+        '/consultation/'
       ],
     },
     sitemap: `${baseUrl}/sitemap.xml`,
-  }
+  };
 }

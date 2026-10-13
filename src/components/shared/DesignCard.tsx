@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { formatPrice } from "@/lib/format";
+import { formatPrice, formatPlotSize } from "@/lib/format";
 import { ArrowRight, FileDown } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { WishlistButton } from "./WishlistButton";
@@ -62,7 +62,7 @@ export function DesignCard({ design, className = "" }: DesignCardProps) {
       <div className="p-6 flex flex-col flex-1">
         <div className="flex justify-between items-center mb-3">
           <span className="text-[10px] font-bold tracking-widest uppercase text-[#b89047]">{design.facing} Facing</span>
-          <span className="text-[10px] font-bold uppercase tracking-wider text-stone-400 bg-stone-50 px-2 py-0.5 rounded-sm">{design.plotWidthFt}×{design.plotLengthFt} ft Plot</span>
+          <span className="text-[10px] font-bold uppercase tracking-wider text-stone-400 bg-stone-50 px-2 py-0.5 rounded-sm">{formatPlotSize(design.plotWidthFt, design.plotLengthFt)} Plot</span>
         </div>
         
         <Link href={`/designs/${design.slug}`} className="block mb-4">
@@ -79,7 +79,11 @@ export function DesignCard({ design, className = "" }: DesignCardProps) {
         <div className="mt-auto pt-5 border-t border-stone-100 flex items-center justify-between">
           <div className="flex flex-col">
             <span className="text-[9px] font-bold uppercase tracking-widest text-stone-400">Fixed Price</span>
-            <span className="font-mono font-bold text-base text-slate-900">{formatPrice(design.priceInr)}</span>
+            {design.priceInr && design.priceInr > 0 ? (
+              <span className="font-mono font-bold text-base text-slate-900">{formatPrice(design.priceInr)}</span>
+            ) : (
+              <span className="font-serif font-bold text-sm text-rose-600">Price Unavailable</span>
+            )}
           </div>
           <Link 
             href={`/designs/${design.slug}`}

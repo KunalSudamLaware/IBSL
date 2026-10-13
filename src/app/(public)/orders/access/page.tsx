@@ -4,7 +4,7 @@ import { verifyOrderAccessToken, generateDownloadToken } from "@/lib/tokens";
 import { buttonVariants } from "@/components/ui/button";
 import { Download, FileText } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { formatPrice } from "@/lib/format";
+import { formatPrice, formatFileType } from "@/lib/format";
 
 type PageProps = {
   searchParams: Promise<{ token: string | undefined }>;
@@ -123,7 +123,7 @@ export default async function GuestOrderAccessPage(props: PageProps) {
                       <FileText className="w-5 h-5 stroke-1" />
                     </div>
                     <div>
-                      <p className="text-xs font-bold uppercase tracking-wider text-slate-900">{file.fileType} Format File</p>
+                      <p className="text-xs font-bold uppercase tracking-wider text-slate-900">{formatFileType(file.fileType)} File</p>
                       <p className="text-[10px] text-stone-400 font-semibold tracking-wider uppercase mt-0.5">Size: {(file.sizeBytes / 1024 / 1024).toFixed(2)} MB</p>
                     </div>
                   </div>
@@ -132,7 +132,7 @@ export default async function GuestOrderAccessPage(props: PageProps) {
                     className="inline-flex items-center justify-center px-6 py-3 bg-slate-900 hover:bg-slate-800 text-white text-[10px] font-bold tracking-widest uppercase transition-all duration-300 rounded-lg border border-slate-900 gap-1.5"
                   >
                     <Download className="w-3.5 h-3.5 text-[#b89047]" />
-                    Download {file.fileType}
+                    Download {formatFileType(file.fileType)}
                   </a>
                 </div>
               );

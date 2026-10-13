@@ -156,6 +156,9 @@ export async function PUT(req: Request, props: PageProps) {
         
         const buffer = Buffer.from(await file.arrayBuffer());
         const { url } = await processAndUploadPublicImage(buffer, file.name);
+          if (url.includes("placeholder.r2.cloudflarestorage.com")) {
+            return NextResponse.json({ error: "The image URL is a placeholder. A valid configured R2 URL or properly uploaded image is required." }, { status: 400 });
+          }
         
         uploadedImages.push({
           url,

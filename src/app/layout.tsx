@@ -14,8 +14,27 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Morya Designs - Premium House Plan Marketplace",
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://moryadesigns.com"),
+  title: {
+    template: "%s | Morya Designs",
+    default: "Morya Designs - Premium House Plan Marketplace",
+  },
   description: "Explore and download custom house design floor plans, elevations, and structural blueprints.",
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    title: "Morya Designs",
+    description: "Premium House Plan Marketplace",
+    url: "/",
+    siteName: "Morya Designs",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Morya Designs",
+    description: "Premium House Plan Marketplace",
+  }
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

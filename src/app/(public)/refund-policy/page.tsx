@@ -13,7 +13,7 @@ export default function RefundPolicyPage() {
         <div className="prose prose-stone max-w-none text-sm text-stone-600 leading-relaxed space-y-8">
           <div>
             <h2 className="text-sm font-bold uppercase tracking-wider text-slate-900 mb-2">Digital Goods Return Policy</h2>
-            <p>Because Morya Design Firm deals strictly in digital goods (CAD files, PDF blueprints, 3D renders) that are delivered instantly upon purchase, <strong className="text-slate-900">all sales are final.</strong></p>
+            <p>Because Morya Designs deals strictly in digital goods (CAD files, PDF blueprints, 3D renders) that are delivered instantly upon purchase, <strong className="text-slate-900">all sales are final.</strong></p>
           </div>
           
           <div>

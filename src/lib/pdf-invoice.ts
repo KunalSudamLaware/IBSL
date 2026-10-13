@@ -12,7 +12,7 @@ export function generateInvoicePDF(order: Order, design: Design): Promise<Buffer
       doc.on("error", (err) => reject(err));
 
       // Header
-      doc.fontSize(22).font('Helvetica-Bold').text("MORYA DESIGN FIRM", { align: "center" });
+      doc.fontSize(22).font('Helvetica-Bold').text("Morya Designs", { align: "center" });
       doc.moveDown(0.5);
       doc.fontSize(14).font('Helvetica').text("Tax Invoice / Receipt", { align: "center" });
       doc.moveDown(2);

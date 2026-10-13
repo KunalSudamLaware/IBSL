@@ -7,7 +7,7 @@ export default function AboutPage() {
         
         <div className="bg-stone-50/50 p-8 md:p-12 border border-stone-200 rounded-lg text-left space-y-6 shadow-sm">
           <p className="text-sm text-stone-600 leading-relaxed font-semibold">
-            Welcome to Morya Design Firm. We specialize in premium architectural house plans, 3D elevations, and structural blueprints for modern homes.
+            Welcome to Morya Designs. We specialize in premium architectural house plans, 3D elevations, and structural blueprints for modern homes.
           </p>
           <p className="text-sm text-stone-600 leading-relaxed">
             Our mission is to make high-quality architectural design accessible and affordable, allowing you to instantly download ready-to-build CAD plans for your dream home.

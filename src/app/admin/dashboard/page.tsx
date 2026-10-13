@@ -4,7 +4,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { IndianRupee, ShoppingCart, LayoutGrid, Activity, Calendar, RefreshCcw, Plus, Users, Settings, ArrowRight, FolderOpen, AlertCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { DashboardFilter } from "./DashboardFilter";
-import { formatPrice } from "@/lib/format";
+import { formatPrice, formatPlotSize } from "@/lib/format";
 
 type Props = {
   searchParams: Promise<{ range?: string }>;
@@ -615,7 +615,7 @@ export default async function AdminDashboardPage(props: Props) {
                       {design.title}
                     </h3>
                     <p className="text-[10px] text-stone-500 font-semibold uppercase tracking-wider mt-1">
-                      {design.bhk} BHK • {design.plotWidthFt}x{design.plotLengthFt} ft Plot
+                      {design.bhk} BHK • {formatPlotSize(design.plotWidthFt, design.plotLengthFt)} Plot
                     </p>
                   </div>
                   

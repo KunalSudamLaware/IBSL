@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { CheckCircle2, ShieldCheck, Download, ChevronRight, Lock, Clock, HeadphonesIcon, ArrowRight, FileDown, Compass, FileCheck } from "lucide-react";
 import Script from "next/script";
 import { prisma } from "@/lib/prisma";
-import { formatPrice } from "@/lib/format";
+import { formatPrice, formatPlotSize, formatFileType } from "@/lib/format";
 
 type PageProps = {
   params: Promise<{ slug: string }>;
@@ -27,7 +27,7 @@ export async function generateMetadata(props: PageProps): Promise<Metadata> {
   const desc = design.description || `Buy ${design.plotWidthFt}x${design.plotLengthFt} sqft house design. ${design.bhk} BHK, ${design.facing} facing.`;
 
   return {
-    title: `${design.title} - House Design | Morya Design Firm`,
+    title: `${design.title} - House Design | Morya Designs`,
     description: desc,
     openGraph: {
       title: design.title,
@@ -86,10 +86,12 @@ export default async function DesignDetailPage(props: PageProps) {
   };
 
   // Inspect database features dynamically
-  const isVastu = design.styleTags.some(tag => tag.toLowerCase().includes("vastu"));
-  const hasThreeD = design.files.some(f => f.fileType === "THREE_D");
-  const hasStructural = design.files.some(f => f.fileType === "DWG");
-  const fileFormatsList = design.files.map(f => f.fileType).join(", ") || "PDF, DWG";
+  const safeStyleTags = design.styleTags || [];
+  const safeFiles = design.files || [];
+  const isVastu = safeStyleTags.some(tag => tag.toLowerCase().includes("vastu"));
+  const hasThreeD = safeFiles.some(f => f.fileType === "THREE_D");
+  const hasStructural = safeFiles.some(f => f.fileType === "DWG");
+  const fileFormatsList = safeFiles.map(f => f.fileType).join(", ") || "PDF, DWG";
 
   return (
     <>
@@ -142,7 +144,7 @@ export default async function DesignDetailPage(props: PageProps) {
               </h2>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-y-8 gap-x-6">
                 {[
-                  { label: "Plot Size", val: `${design.plotWidthFt} Ã ${design.plotLengthFt} ft` },
+                  { label: "Plot Size", val: `${formatPlotSize(design.plotWidthFt, design.plotLengthFt)}` },
                   { label: "Plot Area", val: `${design.plotAreaSqft.toLocaleString()} sq.ft` },
                   { label: "Built-up Area", val: `${design.builtUpAreaSqft.toLocaleString()} sq.ft` },
                   { label: "Bedrooms", val: `${design.bhk} BHK` },
@@ -320,7 +322,7 @@ export default async function DesignDetailPage(props: PageProps) {
                     <div className="p-6 flex flex-col flex-1">
                       <div className="flex justify-between items-center mb-3">
                         <span className="text-xs font-semibold tracking-wider uppercase text-[#b89047]">{relDesign.facing} Facing</span>
-                        <span className="text-xs font-medium text-stone-500">{relDesign.plotWidthFt}Ãâ{relDesign.plotLengthFt} ft Plot</span>
+                        <span className="text-xs font-medium text-stone-500">{formatPlotSize(relDesign.plotWidthFt, relDesign.plotLengthFt)} Plot</span>
                       </div>
                       
                       <Link href={`/designs/${relDesign.slug}`} className="block mb-4">

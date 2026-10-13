@@ -16,11 +16,16 @@ export function AnimatedCounter({ value, suffix = "", className, duration = 2000
   const ref = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
+    if (typeof window === 'undefined' || !('IntersectionObserver' in window)) {
+      setIsVisible(true);
+      return;
+    }
+
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
           setIsVisible(true);
-          if (ref.current) observer.unobserve(ref.current);
+          observer.disconnect();
         }
       },
       { threshold: 0.1 }
@@ -30,30 +35,48 @@ export function AnimatedCounter({ value, suffix = "", className, duration = 2000
       observer.observe(ref.current);
     }
 
+    const timeout = setTimeout(() => {
+      setIsVisible(true);
+      observer.disconnect();
+    }, 3000);
+
     return () => {
-      if (ref.current) observer.unobserve(ref.current);
+      observer.disconnect();
+      clearTimeout(timeout);
     };
   }, []);
 
   useEffect(() => {
     if (!isVisible) return;
     
+    if (!value || value <= 0) {
+      setCount(value || 0);
+      return;
+    }
+
     let startTimestamp: number | null = null;
+    let animationFrameId: number;
+
     const step = (timestamp: number) => {
       if (!startTimestamp) startTimestamp = timestamp;
       const progress = Math.min((timestamp - startTimestamp) / duration, 1);
       
-      // easeOutExpo
       const easeProgress = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
-      
       setCount(Math.floor(easeProgress * value));
       
       if (progress < 1) {
-        window.requestAnimationFrame(step);
+        animationFrameId = window.requestAnimationFrame(step);
+      } else {
+        setCount(value);
       }
     };
     
-    window.requestAnimationFrame(step);
+    animationFrameId = window.requestAnimationFrame(step);
+
+    return () => {
+      window.cancelAnimationFrame(animationFrameId);
+      setCount(value);
+    };
   }, [isVisible, value, duration]);
 
   return (

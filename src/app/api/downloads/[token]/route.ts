@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { verifyDownloadToken } from "@/lib/tokens";
 import { getSignedDownloadUrl, objectExistsInR2 } from "@/lib/r2";
+import { formatFileType } from "@/lib/format";
 import { downloadRateLimiter } from "@/lib/rate-limit";
 import fs from "fs";
 import path from "path";
@@ -83,7 +84,7 @@ export async function GET(req: Request, props: Params) {
       // If it's a seeded design or missing, stream a generated blueprint txt file
       const content = `MORYA DESIGNS - ARCHITECTURAL BLUEPRINT DELIVERABLE\n\n` +
         `Design Title: ${order.design.title}\n` +
-        `File Format: ${file.fileType}\n` +
+        `File Format: ${formatFileType(file.fileType)}\n` +
         `Invoice Number: ${order.invoiceNumber || "N/A"}\n` +
         `Date Purchased: ${order.createdAt.toLocaleDateString("en-IN")}\n` +
         `Authorized Customer: ${order.email}\n\n` +
